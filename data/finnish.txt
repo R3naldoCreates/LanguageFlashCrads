@@ -1,0 +1,250 @@
+# ═══════════════════════════════════════════════════════════════
+#  SUOMI (Finnish) — Basic / A1 deck  ·  200 words
+# ═══════════════════════════════════════════════════════════════
+#  Format:  front | english | pos | features | example | example-translation
+#  · Lines starting with # are comments.  Blank lines are ignored.
+#  · Features are "key=value" pairs separated by ";"
+#  · Values may contain commas (used for conjugations) — never use "|" or ";"
+#    inside free text.
+#  · Nouns show the three forms you always learn: nominative (front),
+#    genitive (gen=) and partitive (part=), plus common locatives.
+#  · Finnish has NO grammatical gender and no articles.
+#  · Verbs show all six present-tense persons (pres=).
+#  · Levels: A1 = basic, later add level=A2 / level=B1 lines.
+# ═══════════════════════════════════════════════════════════════
+@code fi
+@name Finnish
+@emoji 🇫🇮
+@frontLabel Suomi
+@backLabel English
+@ttsLang fi-FI
+@pos noun=Noun, verb=Verb, pron=Pronoun, adj=Adjective, adv=Adverb, num=Numeral, phrase=Phrase, interj=Interjection
+@feature gen=Genitive, part=Partitive, pl=Plural, iness=Inessive (in), ill=Illative (into), all=Allative (onto), grad=Gradation, pres=Present tense, pron=Pronunciation, level=Level, note=Note
+
+# ── PRONOUNS (14) ──────────────────────────────────────────────
+minä | I | pron | gen=minun; part=minua; pl=me; pron=/ˈminæ/ | Minä olen täällä. | I am here.
+sinä | you (singular) | pron | gen=sinun; part=sinua; pl=te; pron=/ˈsinæ/ | Sinä olet ystäväni. | You are my friend.
+hän | he / she | pron | gen=hänen; part=häntä; pl=he; note=no gender — hän covers he and she; pron=/hæn/ | Hän on opiskelija. | He/She is a student.
+me | we | pron | gen=meidän; part=meitä | Me olemme Suomesta. | We are from Finland.
+te | you (plural / polite) | pron | gen=teidän; part=teitä | Te olette ystäviä. | You (pl.) are friends.
+he | they | pron | gen=heidän; part=heitä | He asuvat Helsingissä. | They live in Helsinki.
+tämä | this | pron | pl=nämä; note=this one, near speaker | Tämä on talo. | This is a house.
+se | that / it | pron | pl=ne; note=also "it" and dummy subject | Se on iso. | It is big.
+tuo | that (over there) | pron | pl=nuo; note=that one, near listener | Tuo on minun autoni. | That is my car.
+kuka | who | pron | pl=ketkä; gen=kenen | Kuka on sinun nimesi? | What is your name? (Who is your name?)
+mitä | what | pron | nom=mikä; note=mitä is partitive of mikä | Mitä sinä teet? | What are you doing?
+oma | own | pron | note=possessive "one's own" | Oma koti on paras. | One's own home is best.
+kaikki | all / everyone | pron | pl=kaikki; note=indefinite | Kaikki ovat täällä. | Everyone is here.
+muu | other / else | pron | pl=muut; note=muu kuin = other than | Muut odottavat ulkona. | The others are waiting outside.
+
+# ── NUMBERS (12) ───────────────────────────────────────────────
+yksi | one | num | part=yhtä; pl=yhdet; note=also "a/an" | Yksi kahvi, kiitos. | One coffee, please.
+kaksi | two | num | part=kahta, no gender | Kaksi leipää. | Two breads.
+kolme | three | num | part=kolmea | Kolme ystävää. | Three friends.
+neljä | four | num | part=neljää | Neljä omenaa. | Four apples.
+viisi | five | num | part=viittä; note=changes to "viite-" before t | Viisi kymmentä on viisisataa. | Five tens is five hundred.
+kuusi | six | num | part=kuutta; note=also "sixth" | Kuusi tuntia. | Six hours.
+seitsemän | seven | num | part=seitsemää | Seitsemän päivää. | Seven days.
+kahdeksan | eight | num | part=kahdeksaa | Kahdeksan tuntia unta. | Eight hours of sleep.
+yhdeksän | nine | num | part=yhdeksää | Yhdeksän euroa. | Nine euros.
+kymmenen | ten | num | part=kymmenettä | Kymmenen minuuttia. | Ten minutes.
+sata | hundred | num | part=sataa; pl=sadat; note=200 = kaksisataa | Sata ihmistä. | A hundred people.
+tuhat | thousand | num | part=tuhatta; note=2000 = kaksituhatta | Tuhat ihmistä. | A thousand people.
+
+# ── NOUNS: FOOD & DRINK (16) ───────────────────────────────────
+leipä | bread | noun | gen=leivän; part=leipää; pl=leivät; pron=/ˈleipæ/ | Leipä on tuoretta. | The bread is fresh.
+maito | milk | noun | gen=maidon; part=maitoa; note=invariable plural; pron=/ˈmaito/ | Lasillinen maitoa. | A glass of milk.
+juusto | cheese | noun | gen=juuston; part=juustoa; pron=/ˈjuustɔ/ | Juusto on suolasta. | The cheese is salty.
+kana | chicken | noun | gen=kanan; part=kanaa; pl=kanat; pron=/ˈkɑnɑ/ | Kana on ruuassa. | Chicken is on the menu.
+liha | meat | noun | gen=lihan; part=lihaa; pron=/ˈlihɑ/ | Liha on kallista. | Meat is expensive.
+kala | fish | noun | gen=kalan; part=kalaa; pl=kalat; pron=/ˈkɑlɑ/ | Kalaa ja perunaa. | Fish and potato.
+peruna | potato | noun | gen=perunan; part=perunaa; pl=perunat | Perunoita ja voita. | Potatoes and butter.
+omena | apple | noun | gen=omenan; part=omenaa; pl=omenat | Omena on punainen. | The apple is red.
+kahvi | coffee | noun | gen=kahvin; part=kahvia; pl=kahvit; note=Finns drink a lot of coffee | Kahvia, kiitos. | Coffee, please.
+tee | tea | noun | gen=teen; part=teetä; note=long vowel matters: tee=tea, te=you | Lasillinen teetä. | A glass of tea.
+ruoka | food / meal | noun | gen=ruuan; part=ruokaa; pl=ruoat; note=gradation ruuan | Ruoka on valmis. | The food is ready.
+vesi | water | noun | gen=veden; part=vettä; pl=vedet; note=gradation vesi→veden; pron=/ˈvesi/ | Vettä, kiitos. | Water, please.
+mehu | juice | noun | gen=mehun; part=mehua; pl=mehut | Omenanmehua, kiitos. | Apple juice, please.
+sokeri | sugar | noun | gen=sokerin; part=sokeria; note=invariable | Kahvi ilman sokeria. | Coffee without sugar.
+olut | beer | noun | gen=oluen; part=olutta; note=gradation olut→oluen | Pullo olutta. | A bottle of beer.
+viini | wine | noun | gen=viinin; part=viiniä; pl=viinit | Punaviiniä, kiitos. | Red wine, please.
+
+# ── NOUNS: FAMILY (12) ─────────────────────────────────────────
+äiti | mother | noun | gen=äidin; part=äitiä; pl=äidit; note=gradation äiti→äidin; pron=/ˈæiti/ | Äiti keittää ruokaa. | Mother is cooking.
+isä | father | noun | gen=isän; part=isää; pl=isät; pron=/ˈisæ/ | Isä lukee lehteä. | Father reads the newspaper.
+lapsi | child | noun | gen=lapsen; part=lasta; pl=lapset; note=gradation lapsi→lapsen→lasta | Lapsi nukkuu. | The child sleeps.
+veli | brother | noun | gen=veljen; part=veljeä; pl=veljet; note=gradation veli→veljen | Veljani asuu Tampereella. | My brother lives in Tampere.
+sisko | sister | noun | gen=siskon; part=siskoa; pl=siskot | Sisko opiskeli kieliä. | Sister studied languages.
+vaimo | wife | noun | gen=vaimon; part=vaimoa; pl=vaimot | Vaimo työskentelee sairaalassa. | The wife works at a hospital.
+mies | man / husband | noun | gen=miehen; part=miestä; pl=miehet; note=collides with "husband" contextually; pron=/mies/ | Mies istuu pöydän ääressä. | A man sits at the table.
+nainen | woman | noun | gen=naisen; part=naista; pl=naiset | Nainen lukee kirjaa. | The woman reads a book.
+ystävä | friend | noun | gen=ystävän; part=ystävää; pl=ystävät; pron=/ˈystævæ/ | Ystäväni on suomalainen. | My friend is Finnish.
+perhe | family | noun | gen=perheen; part=perhettä; pl=perheet | Perhe on tärkeä. | Family is important.
+poika | boy / son | noun | gen=pojan; part=poikaa; pl=pojat | Poika pelaa jalkapalloa. | The boy plays football.
+tyttö | girl / daughter | noun | gen=tytön; part=tyttöä; pl=tytöt | Tyttö piirtää kuvaa. | The girl draws a picture.
+
+# ── NOUNS: BODY (12) ───────────────────────────────────────────
+pää | head | noun | gen=pään; part=päätä; pl=päät; note=partitive päätä is irregular; pron=/pæː/ | Pää särkee. | My head hurts.
+silmä | eye | noun | gen=silmän; part=silmää; pl=silmät | Silmät ovat siniset. | The eyes are blue.
+korva | ear | noun | gen=korvan; part=korvaa; pl=korvat | Korvat särkevät. | The ears hurt.
+suu | mouth | noun | gen=suun; part=suuta; pl=suut | Suu on auki. | The mouth is open.
+hammas | tooth | noun | gen=hampaan; part=hammasta; pl=hampaat; note=gradation hammas→hampaan | Hammas särkee. | The tooth hurts.
+käsi | hand | noun | gen=käden; part=kättä; pl=kädet; note=irregular: käsi→käden→kättä; pron=/ˈkæsi/ | Kädet ovat likaiset. | The hands are dirty.
+jalka | leg / foot | noun | gen=jalan; part=jalkaa; pl=jalat | Jalka on rikki. | The leg/foot is broken.
+sydän | heart | noun | gen=sydämen; part=sydäntä; note=gradation sydän→sydämen | Sydän lyö nopeasti. | The heart beats fast.
+vatsa | stomach | noun | gen=vatsan; part=vatsaa; pl=vatsat | Vatsa murisee. | The stomach rumbles.
+sormi | finger | noun | gen=sormen; part=sormea; pl=sormet | Sormet ovat pitkät. | The fingers are long.
+polvi | knee | noun | gen=polven; part=polvea; pl=polvet; note=gradation polvi→polven | Polvi on mustellut. | The knee is bruised.
+hartia | shoulder | noun | gen=hartian; part=hartiaa; pl=hartiat | Hartiat ovat kireät. | The shoulders are stiff.
+
+# ── NOUNS: HOME & OBJECTS (14) ─────────────────────────────────
+koti | home | noun | gen=kodin; part=kotia; pl=kodit; pron=/ˈkoti/ | Koti on pieni. | The home is small.
+huone | room | noun | gen=huoneen; part=huonetta; pl=huoneet; pron=/ˈhuone/ | Huone on lämmin. | The room is warm.
+keittiö | kitchen | noun | gen=keittiön; part=keittiötä; pl=keittiöt; note=ö from front-vowel harmony | Ruoka on keittiössä. | The food is in the kitchen.
+ovi | door | noun | gen=oven; part=ovea; pl=ovet; note=gradation ovi→oven | Ovi on kiinni. | The door is closed.
+ikkuna | window | noun | gen=ikkunan; part=ikkunaa; pl=ikkunat | Ikkuna on auki. | The window is open.
+pöytä | table | noun | gen=pöydän; part=pöytää; pl=pöydät; note=front vowels: pöytä, not *poyta | Pöydällä on kirja. | There is a book on the table.
+tuoli | chair | noun | gen=tuolin; part=tuolia; pl=tuolit | Tuoli on puuta. | The chair is (made of) wood.
+sänky | bed | noun | gen=sängyn; part=sänkyä; pl=sängyt; note=gradation sänky→sängyn | Sänkyjä on kaksi. | There are two beds.
+auto | car | noun | gen=auton; part=autoa; pl=autot; pron=/ˈɑuto/ | Auto on pihalla. | The car is in the yard.
+avain | key | noun | gen=avaimen; part=avainta; pl=avaimet; note=gradation avain→avaimen | Avain on taskussa. | The key is in the pocket.
+kirja | book | noun | gen=kirjan; part=kirjaa; pl=kirjat | Kirja on pöydällä. | The book is on the table.
+puhelin | phone | noun | gen=puhelimen; part=puhelinta; pl=puhelimet; note=gradation puhelin→puhelimen | Puhelin soi. | The phone rings.
+raha | money | noun | gen=rahan; part=rahaa; pl=rahat | Raha riittää. | The money is enough.
+kello | clock / watch | noun | gen=kellon; part=kelloa; pl=kellot; note=kello also = "o'clock" | Kello on seitsemän. | It is seven o'clock.
+
+# ── NOUNS: PLACES (12) ─────────────────────────────────────────
+kaupunki | city | noun | gen=kaupungin; part=kaupunkia; pl=kaupungit; note=gradation kaupunki→kaupungin; pron=/ˈkaupunki/ | Kaupunki on suuri. | The city is big.
+katu | street | noun | gen=kadun; part=katua; pl=kadut; note=gradation katu→kadun | Katu on kapea. | The street is narrow.
+myymälä | shop | noun | gen=myymälän; part=myymälää; pl=myymälät | Myymälä on kiinni. | The shop is closed.
+koulu | school | noun | gen=koulun; part=koulua; pl=koulut | Koulu on lähellä. | The school is nearby.
+sairaala | hospital | noun | gen=sairaalan; part=sairaalaa; pl=sairaalat | Hän on sairaalassa. | He/She is in hospital.
+ranta | beach / shore | noun | gen=rannan; part=rantaa; pl=rannat | Kävelemme rannalla. | We walk on the beach.
+vuori | mountain | noun | gen=vuoren; part=vuorta; pl=vuoret | Vuori on korkea. | The mountain is high.
+joki | river | noun | gen=joen; part=jokea; pl=joet; note=partitive pl jokia | Joki on syvä. | The river is deep.
+maa | land / earth / country | noun | gen=maan; part=maata; pl=maat; note=also "ground"; Suomi = Finland | Maa on vihreä. | The land is green.
+kirkko | church | noun | gen=kirkon; part=kirkkoa; pl=kirkot | Kirkko on vanha. | The church is old.
+ravintola | restaurant | noun | gen=ravintolan; part=ravintolaa; pl=ravintolat | Ravintola on auki. | The restaurant is open.
+asema | station | noun | gen=aseman; part=asemaa; pl=asemat | Asema on lähellä. | The station is nearby.
+
+# ── NOUNS: TIME (8) ────────────────────────────────────────────
+päivä | day | noun | gen=päivän; part=päivää; pl=päivät; pron=/ˈpæivæ/ | Hyvää päivää! | Good afternoon / Good day!
+yö | night | noun | gen=yön; part=yötä; pl=yöt | Yö on pimeä. | The night is dark.
+aamu | morning | noun | gen=aamun; part=aamua; pl=aamut | Aamulla juon kahvia. | In the morning I drink coffee.
+viikko | week | noun | gen=viikon; part=viikkoa; pl=viikot | Viikossa on seitsemän päivää. | A week has seven days.
+kuukausi | month | noun | gen=kuukauden; part=kuukautta; pl=kuukaudet; note=gradation kuukausi→kuukauden | Kuukausi on pitkä. | The month is long.
+vuosi | year | noun | gen=vuoden; part=vuotta; pl=vuodet; note=gradation vuosi→vuoden | Olen kolmekymmentävuotias. | I am thirty years old.
+tunti | hour | noun | gen=tunnin; part=tuntia; pl=tunnit | Tunti on lyhyt. | The hour is short.
+hetki | moment | noun | gen=hetken; part=hetkeä; pl=hetket; note=gradation hetki→hetken | Odota hetki! | Wait a moment!
+
+# ── NOUNS: NATURE & ANIMALS (16) ───────────────────────────────
+aurinko | sun | noun | gen=auringon; part=aurinkoa; note=gradation aurinko→auringon; pron=/ˈaurinko/ | Aurinko paistaa. | The sun shines.
+kuu | moon | noun | gen=kuun; part=kuuta; pl=kuut | Kuu on täynnä. | The moon is full.
+tähti | star | noun | gen=tähden; part=tähteä; pl=tähdet | Tähdet loistavat. | The stars shine.
+puu | tree / wood | noun | gen=puun; part=puuta; pl=puut | Puu on korkea. | The tree is tall.
+kukka | flower | noun | gen=kukan; part=kukkaa; pl=kukat; note=gradation kukka→kukan | Kukka on kaunis. | The flower is beautiful.
+tuuli | wind | noun | gen=tuulen; part=tuulta; pl=tuulet | Tuuli on kova. | The wind is strong.
+lumi | snow | noun | gen=lumen; part=lunta; note=gradation lumi→lumen→lunta | Lumi on valkoista. | The snow is white.
+tuli | fire | noun | gen=tulen; part=tulta; pl=tulet | Tuli lämmittää. | The fire warms.
+taivas | sky / heaven | noun | gen=taivaan; part=taivasta; note=gradation taivas→taivaan | Taivas on sininen. | The sky is blue.
+metsä | forest | noun | gen=metsän; part=metsää; pl=metsät | Metsä on vihreä. | The forest is green.
+kissa | cat | noun | gen=kissan; part=kissaa; pl=kissat; pron=/ˈkissɑ/ | Kissa nukkuu sohvalla. | The cat sleeps on the sofa.
+koira | dog | noun | gen=koiran; part=koiraa; pl=koirat; pron=/ˈkoirɑ/ | Koira juoksee pihalla. | The dog runs in the yard.
+lintu | bird | noun | gen=linnun; part=lintua; pl=linnut; note=gradation lintu→linnun | Lintu laulaa puussa. | The bird sings in the tree.
+hevonen | horse | noun | gen=hevosen; part=hevosta; pl=hevokset; note=plural has gradation hevonen→hevokset | Hevonen juoksee nopeasti. | The horse runs fast.
+lehmä | cow | noun | gen=lehmän; part=lehmää; pl=lehmät | Lehmä syö nurmikolla. | The cow eats on the meadow.
+hiiri | mouse | noun | gen=hiiren; part=hiirtä; pl=hiiret; note=gradation hiiri→hiiren | Hiiri juoksee keittiössä. | The mouse runs in the kitchen.
+
+# ── NOUNS: EVERYDAY ABSTRACT (6) ───────────────────────────────
+työ | work | noun | gen=työn; part=työtä; pl=työt; pron=/tyø/ | Työ alkaa kahdeksalta. | Work starts at eight.
+musiikki | music | noun | gen=musiikin; part=musiikkia; note=invariable plural | Kuuntelen musiikkia. | I listen to music.
+sana | word | noun | gen=sanan; part=sanaa; pl=sanat | Tämä sana on vaikea. | This word is hard.
+kysymys | question | noun | gen=kysymyksen; part=kysymystä; pl=kysymykset; note=gradation kysymys→kysymyksen | Minulla on kysymys. | I have a question.
+nimi | name | noun | gen=nimen; part=nimeä; pl=nimet; note=gradation nimi→nimen | Nimi on Anna. | The name is Anna.
+elämä | life | noun | gen=elämän; part=elämää; pl=elämät | Elämä on kaunista. | Life is beautiful.
+
+# ── VERBS (36, present tense, all six persons) ─────────────────
+olla | to be | verb | pres=minä olen, sinä olet, hän on, me olemme, te olette, he ovat; note=only truly irregular verb (on, ovat); pron=/ˈollɑ/ | Hän on opiskelija. | He/She is a student.
+tehdä | to do / to make | verb | pres=minä teen, sinä teet, hän tekee, me teemme, te teette, he tekevät; note=type 2 (-dä) | Mitä sinä teet? | What are you doing?
+tulla | to come | verb | pres=minä tulen, sinä tulet, hän tulee, me tulemme, te tulette, he tulevat; note=type 3 | Tule tänne! | Come here!
+mennä | to go | verb | pres=minä menen, sinä menet, hän menee, me menemme, te menette, he menevät; note=type 3, spoken mään | Me menemme kouluun. | We go to school.
+juoda | to drink | verb | pres=minä juon, sinä juot, hän juo, me juomme, te juotte, he juovat; note=type 2 | Juon vettä. | I drink water.
+syödä | to eat | verb | pres=minä syön, sinä syöt, hän syö, me syömme, te syötte, he syövät; note=type 2 | Syön leipää. | I eat bread.
+nukkua | to sleep | verb | pres=minä nukun, sinä nukut, hän nukkuu, me nukumme, te nukutte, he nukkuvat; note=type 3 | Nukun kahdeksan tuntia. | I sleep eight hours.
+haluta | to want | verb | pres=minä haluan, sinä haluat, hän haluaa, me haluamme, te haluatte, he haluavat; note=type 4, takes infinitive | Haluan kahvia. | I want coffee.
+pitää | to like / to hold | verb | pres=minä pidän, sinä pidät, hän pitää, me pidämme, te pidätte, he pitävät; note=pidän (jostakin) = I like (something) | Pidän sinusta. | I like you.
+rakastaa | to love | verb | pres=minä rakastan, sinä rakastat, hän rakastaa, me rakastamme, te rakastatte, he rakastavat | Rakastan Suomea. | I love Finland.
+nähdä | to see | verb | pres=minä näen, sinä näet, hän näkee, me näemme, te näette, he näkevät; note=type 2, irregular | Näen tähden. | I see a star.
+kuulla | to hear | verb | pres=minä kuulen, sinä kuulet, hän kuulee, me kuulemme, te kuulette, he kuulevat; note=type 3 | Kuulen linnun laulavan. | I hear the bird singing.
+lukea | to read | verb | pres=minä luen, sinä luet, hän lukee, me luemme, te luette, he lukevat | Luen kirjaa. | I read a book.
+kirjoittaa | to write | verb | pres=minä kirjoitan, sinä kirjoitat, hän kirjoittaa, me kirjoitamme, te kirjoitatte, he kirjoittavat | Kirjoitan viestiä. | I write a message.
+tietää | to know (fact) | verb | pres=minä tiedän, sinä tiedät, hän tietää, me tiedämme, te tiedätte, he tietävät; note=osata = know how to | Tiedän vastauksen. | I know the answer.
+osata | to know how to | verb | pres=minä osaan, sinä osaat, hän osaa, me osaamme, te osaatte, he osaavat | Osaan puhua suomea. | I can speak Finnish.
+puhua | to speak | verb | pres=minä puhun, sinä puhut, hän puhuu, me puhumme, te puhutte, he puhuvat; note=gradation puhua→puhun | Puhun suomea ja englantia. | I speak Finnish and English.
+ajatella | to think | verb | pres=minä ajattelen, sinä ajattelet, hän ajattelee, me ajattelemme, te ajattelette, he ajattelevat | Ajattelen sinua. | I think of you.
+tuntea | to feel / to know (person) | verb | pres=minä tunnen, sinä tunnet, hän tuntee, me tunnemme, te tunnette, he tuntevat | Tunnen hänet. | I know him/her.
+ostaa | to buy | verb | pres=minä ostan, sinä ostat, hän ostaa, me ostamme, te ostatte, he ostavat; note=gradation ostaa→ostan | Ostan leipää. | I buy bread.
+myydä | to sell | verb | pres=minä myyn, sinä myyt, hän myy, me myymme, te myytte, he myyvät | Myyvät kalaa torilla. | They sell fish at the market.
+työskennellä | to work | verb | pres=minä työskentelen, sinä työskentelet, hän työskentelee, me työskentelemme, te työskentelette, he työskentelevät; note=type 3 | Työskentelen sairaalassa. | I work at a hospital.
+asua | to live (reside) | verb | pres=minä asun, sinä asut, hän asuu, me asumme, te asutte, he asuvat; note=gradation asua→asun | Asun Helsingissä. | I live in Helsinki.
+kävellä | to walk | verb | pres=minä kävelen, sinä kävelet, hän kävelee, me kävelemme, te kävelette, he kävelevät; note=type 3 | Kävellen rannalla. | I walk on the beach.
+juosta | to run | verb | pres=minä juoksen, sinä juokset, hän juoksee, me juoksemme, te juoksette, he juoksevät; note=irregular consonant change | Juoksen joka aamu. | I run every morning.
+pelata | to play (game/sport) | verb | pres=minä pelaan, sinä pelaat, hän pelaa, me pelaamme, te pelaatte, he pelaavat; note=type 4 | Pelamme jalkapalloa. | We play football.
+auttaa | to help | verb | pres=minä autan, sinä autat, hän autaa, me autamme, te autatte, he autavat; note=gradation auttaa→autan | Autan äitiäni. | I help my mother.
+kysyä | to ask | verb | pres=minä kysyn, sinä kysyt, hän kysyy, me kysymme, te kysytte, he kysyvät | Kysyn nimeä. | I ask the name.
+vastata | to answer | verb | pres=minä vastaan, sinä vastaat, hän vastaa, me vastaamme, te vastaatte, he vastaavat; note=type 5 (-ta) | Vastaan kysymykseen. | I answer the question.
+avata | to open | verb | pres=minä avaan, sinä avaat, hän avaa, me avaamme, te avaatte, he avaavat; note=type 4 | Avaan ikkunan. | I open the window.
+sulkea | to close | verb | pres=minä suljen, sinä suljet, hän sulkee, me suljemme, te suljette, he sulkevat; note=gradation sulkea→suljen | Suljen oven. | I close the door.
+löytää | to find | verb | pres=minä löydän, sinä löydät, hän löytää, me löydämme, te löydätte, he löytävät; note=gradation löytää→löydän | Löydän avaimen. | I find the key.
+antaa | to give | verb | pres=minä annan, sinä annat, hän antaa, me annamme, te annatte, he antavat; note=gradation antaa→annan | Annan sinulle kirjan. | I give you the book.
+ottaa | to take | verb | pres=minä otan, sinä otat, hän ottaa, me otamme, te otatte, he ottavat; note=gradation ottaa→otan | Otan bussin asemalle. | I take the bus to the station.
+maksaa | to pay | verb | pres=minä maksan, sinä maksat, hän maksaa, me maksamme, te maksatte, he maksavat; note=gradation maksaa→maksan | Maksan kahvin. | I pay for the coffee.
+ymmärtää | to understand | verb | pres=minä ymmärrän, sinä ymmärrät, hän ymmärtää, me ymmärrämme, te ymmärrätte, he ymmärtävät | Ymmärrän hyvin. | I understand well.
+
+# ── ADJECTIVES (20) ────────────────────────────────────────────
+iso | big | adj | pl=isot; note=iso is "big" (size), suuri is "great"; pron=/ˈiso/ | Talo on iso. | The house is big.
+pieni | small | adj | pl=pienet | Huone on pieni. | The room is small.
+hyvä | good | adj | pl=hyvät; note=hyvää = "good" (partitive, e.g. hyvää yötä) | Sää on hyvää. | The weather is good.
+huono | bad | adj | pl=huonot | Sää on huonoa. | The weather is bad.
+uusi | new | adj | pl=uudet; note=gradation uusi→uuden | Auto on uusi. | The car is new.
+vanha | old | adj | pl=vanhat | Kirkko on vanha. | The church is old.
+lämmin | warm | adj | note=gradation lämmin→lämpimän, pl lämpimät | Sopa on lämmintä. | The soup is warm.
+kylmä | cold | adj | pl=kylmät | Talvi on kylmä. | Winter is cold.
+kaunis | beautiful | adj | pl=kauniit | Kaunis näkymä! | A beautiful view!
+nopea | fast / quick | adj | pl=nopeat | Bussi on nopea. | The bus is fast.
+hidas | slow | adj | pl=hitaat | Juna on hidas. | The train is slow.
+onnellinen | happy | adj | pl=onnelliset | Olen onnellinen. | I am happy.
+surullinen | sad | adj | pl=surulliset | Elokuva on surullinen. | The film is sad.
+helppo | easy | adj | pl=helpot | Kysymys on helppo. | The question is easy.
+vaikea | difficult | adj | pl=vaikeat; note=grammatically neuter in "on vaikea" | Sana on vaikea. | The word is difficult.
+kallis | expensive | adj | pl=kalliit | Liha on kallista. | Meat is expensive.
+halpa | cheap | adj | pl=halvat | Bussilippu on halpa. | The bus ticket is cheap.
+täysi | full | adj | pl=täydet | Lasillinen on täysi. | The glass is full.
+tyhjä | empty | adj | pl=tyhjät | Pullo on tyhjä. | The bottle is empty.
+korkea | tall / high | adj | pl=korkeat | Vuori on korkea. | The mountain is high.
+
+# ── GREETINGS & PHRASES (12) ───────────────────────────────────
+moi | hi / bye | interj | note=informal, also "hei" neutral and "moikka" | Moi! Mitä kuuluu? | Hi! How are you?
+kiitos | thank you | phrase | note=kiitos = thanks (noun), kiitän = I thank | Kiitos avusta! | Thanks for the help!
+ole hyvä | you're welcome / here you go | phrase | note=literal "be good", also said when handing something over | Ole hyvä! | Here you go!
+anteeksi | sorry / excuse me | phrase | note=also "anteeksipyyntö" apology, spoken "sori" | Anteeksi, missä on asema? | Excuse me, where is the station?
+hyvää yötä | good night | phrase | note=hyvää = partitive of hyvä | Hyvää yötä! | Good night!
+hyvää päivää | good day / good afternoon | phrase | | Hyvää päivää teille! | Good day to you!
+hyvää iltaa | good evening | phrase | | Hyvää iltaa, rouva. | Good evening, madam.
+näkemiin | goodbye | phrase | note=spoken "hei hei", also "nähdään" see you | Näkemiin huomenna! | Goodbye until tomorrow!
+kyllä | yes | interj | note=spoken "joo", emphatic "kyllä kyllä" | Kyllä, kiitos. | Yes, please.
+ei | no / not | interj | note=doubles as the negative particle: ei ole = is not | Ei kiitos. | No thank you.
+tervetuloa | welcome | phrase | note=illative, e.g. tervetuloa Suomeen! | Tervetuloa kotiin! | Welcome home!
+paljon kiitos | thank you very much | phrase | note=paljon = a lot | Paljon kiitos avusta! | Thank you very much for the help!
+
+# ── ADVERBS (10) ───────────────────────────────────────────────
+tänään | today | adv | note=illative-ish form; illalla = in the evening | Tänään sataa lunta. | It snows today.
+eilen | yesterday | adv | note=tomorrow = huomenna | Eilen olin sairaalassa. | Yesterday I was in hospital.
+huomenna | tomorrow | adv | | Huomenna menemme Tampereelle. | Tomorrow we go to Tampere.
+aina | always | adv | note=never = koskaan (with ei) | Aina juon kahvia aamulla. | I always drink coffee in the morning.
+usein | often | adv | | Kävellen usein metsässä. | I often walk in the forest.
+täällä | here | adv | note=over there = siellä | Olen täällä. | I am here.
+siellä | there | adv | | Kissa on siellä. | The cat is there.
+vielä | still / yet | adv | note=vielä ei = not yet | Olen vielä nälkäinen. | I'm still hungry.
+jo | already | adv | | Hän on jo lähtenyt. | He/She has already left.
+liian | too (much) | adv | note=liian + adjective: liian kallis = too expensive | Kahvi on liian kuumaa. | The coffee is too hot.

@@ -1,0 +1,247 @@
+# ═══════════════════════════════════════════════════════════════
+#  PORTUGUÊS (Portuguese) — Basic / A1 deck  ·  200 words
+# ═══════════════════════════════════════════════════════════════
+#  Format:  front | english | pos | features | example | example-translation
+#  · Lines starting with # are comments.  Blank lines are ignored.
+#  · Features are "key=value" pairs separated by ";"
+#  · Values may contain commas (used for conjugations) — never use "|" or ";"
+#    inside free text.
+#  · Add new words by copying a line and editing it. Levels: A1 = basic,
+#    later use level=A2 / level=B1 for medium and hard.
+# ═══════════════════════════════════════════════════════════════
+@code pt
+@name Portuguese
+@emoji 🇵🇹
+@frontLabel Português
+@backLabel English
+@ttsLang pt-PT
+@pos noun=Noun, verb=Verb, pron=Pronoun, adj=Adjective, adv=Adverb, num=Numeral, phrase=Phrase, interj=Interjection
+@feature gender=Gender, plural=Plural, f=Feminine, conj=Conjugation, pron=Pronunciation, level=Level, note=Note
+
+# ── PRONOUNS (14) ──────────────────────────────────────────────
+eu | I | pron | note=subject pronoun; obj=me | Eu sou estudante. | I am a student.
+tu | you (informal) | pron | note=informal, very common in Portugal, Brazil uses você | Tu és meu amigo. | You are my friend.
+você | you | pron | note=formal/neutral "you", default in Brazil | Você está bem? | Are you well?
+ele | he / it (m.) | pron | note=also "it" for masculine nouns | Ele é meu irmão. | He is my brother.
+ela | she / it (f.) | pron | note=also "it" for feminine nouns | Ela é minha irmã. | She is my sister.
+nós | we | pron | | Nós somos amigos. | We are friends.
+vocês | you (plural) | pron | note=BR "you all", PT also "eles" for mixed groups | Vocês falam inglês? | Do you speak English?
+eles | they (m.) | pron | | Eles trabalham aqui. | They work here.
+elas | they (f.) | pron | | Elas estudam no Porto. | They study in Porto.
+meu | my (m.) | pron | plural=meus; f=minha; note=possessive | O meu carro é novo. | My car is new.
+minha | my (f.) | pron | plural=minhas; m=meu; note=possessive | A minha casa é pequena. | My house is small.
+seu | your / his (m.) | pron | plural=seus; f=sua; note=also formal "your" | O seu livro é caro. | Your book is expensive.
+sua | your / his (f.) | pron | plural=suas; m=seu | A sua resposta está certa. | Your answer is right.
+isso | that / it (thing) | pron | note=neuter demonstrative | Isso é bom! | That is good!
+
+# ── NUMBERS (12) ───────────────────────────────────────────────
+um | one | num | gender=m; f=uma | Tenho um gato. | I have one cat.
+dois | two | num | f=duas | Dois cafés, por favor. | Two coffees, please.
+três | three | num | | Três dias são poucos. | Three days are few.
+quatro | four | num | | A semana tem sete dias, o mês tem quatro semanas. | Seven days in a week, four weeks in a month.
+cinco | five | num | | Trabalho cinco dias por semana. | I work five days a week.
+seis | six | num | | O comboio parte às seis. | The train leaves at six.
+sete | seven | num | | A semana tem sete dias. | A week has seven days.
+oito | eight | num | | Oito horas da manhã. | Eight in the morning.
+nove | nine | num | | O trabalho começa às nove. | Work starts at nine.
+dez | ten | num | | Dez minutos de espera. | Ten minutes' wait.
+cem | hundred | num | note=cento before e/ou que | Cem euros, por favor. | One hundred euros, please.
+mil | thousand | num | | Mil pessoas na praia. | A thousand people on the beach.
+
+# ── NOUNS: FOOD & DRINK (16) ───────────────────────────────────
+água | water | noun | gender=f; plural=águas; pron=/ˈa.ɡwɐ/ | Um copo de água, por favor. | A glass of water, please.
+pão | bread | noun | gender=m; plural=pães; pron=/pɐ̃w/ | Como pão no pequeno-almoço. | I eat bread for breakfast.
+arroz | rice | noun | gender=m; plural=arrozes; pron=/ɐˈʁoʃ/ | O arroz está pronto. | The rice is ready.
+carne | meat | noun | gender=f; plural=carnes; pron=/ˈkaɾ.nə/ | A carne está fria. | The meat is cold.
+peixe | fish | noun | gender=m; plural=peixes; pron=/ˈpej.ʃə/ | Comi peixe ontem. | I ate fish yesterday.
+leite | milk | noun | gender=m; note=invariable; pron=/ˈlej.tə/ | Café com leite, por favor. | Coffee with milk, please.
+queijo | cheese | noun | gender=m; plural=queijos; pron=/ˈkej.zu/ | Este queijo é bom. | This cheese is good.
+ovo | egg | noun | gender=m; plural=ovos; pron=/ˈo.vu/ | Dois ovos, por favor. | Two eggs, please.
+maçã | apple | noun | gender=f; plural=maçãs; pron=/mɐˈsɐ̃/ | A maçã é vermelha. | The apple is red.
+banana | banana | noun | gender=f; plural=bananas; pron=/bɐˈnɐ.nɐ/ | Como uma banana. | I eat a banana.
+batata | potato | noun | gender=f; plural=batatas; pron=/bɐˈtɐ.tɐ/ | Batatas fritas com sal. | Fried potatoes with salt.
+tomate | tomato | noun | gender=m; plural=tomates; pron=/tuˈmɐ.tə/ | Salada com tomate. | Salad with tomato.
+café | coffee | noun | gender=m; plural=cafés; pron=/kɐˈfɛ/ | Quero um café. | I want a coffee.
+vinho | wine | noun | gender=m; plural=vinhos; pron=/ˈvi.ɲu/ | Vinho tinto da região. | Red wine from the region.
+cerveja | beer | noun | gender=f; plural=cervejas; pron=/sɨˈvɛ.ʒɐ/ | Uma cerveja, por favor. | A beer, please.
+sopa | soup | noun | gender=f; plural=sopas; pron=/ˈso.pɐ/ | A sopa está quente. | The soup is hot.
+
+# ── NOUNS: FAMILY (12) ─────────────────────────────────────────
+mãe | mother | noun | gender=f; plural=mães; pron=/mɐ̃j/ | A minha mãe é professora. | My mother is a teacher.
+pai | father | noun | gender=m; plural=pais; pron=/paj/ | O meu pai trabalha muito. | My father works a lot.
+filho | son / child | noun | gender=m; plural=filhos; f=filha; pron=/ˈfi.ʎu/ | O filho dela mora em Lisboa. | Her son lives in Lisbon.
+filha | daughter | noun | gender=f; plural=filhas; m=filho; pron=/ˈfi.ʎɐ/ | A filha estuda medicina. | The daughter studies medicine.
+irmão | brother | noun | gender=m; plural=irmãos; f=irmã; pron=/iɾˈmɐ̃w/ | O irmão é mais velho. | The brother is older.
+irmã | sister | noun | gender=f; plural=irmãs; m=irmão; pron=/iɾˈmɐ̃/ | A minha irmã mora aqui. | My sister lives here.
+avô | grandfather | noun | gender=m; plural=avós; f=avó; pron=/ɐˈvo/ | O avô tem oitenta anos. | The grandfather is eighty years old.
+avó | grandmother | noun | gender=f; plural=avós; m=avô; pron=/ɐˈvɔ/ | A avó cozinha muito bem. | The grandmother cooks very well.
+esposa | wife | noun | gender=f; plural=esposas; pron=/ɨʃˈpo.zɐ/ | A esposa dele é advogada. | His wife is a lawyer.
+marido | husband | noun | gender=m; plural=maridos; pron=/mɐˈɾi.du/ | O marido está em casa. | The husband is at home.
+criança | child | noun | gender=f; plural=crianças; pron=/kɾiˈɐ̃.sɐ/ | A criança dorme cedo. | The child sleeps early.
+família | family | noun | gender=f; plural=famílias; pron=/fɐˈmi.li.ɐ/ | A família come junta. | The family eats together.
+
+# ── NOUNS: BODY (12) ───────────────────────────────────────────
+cabeça | head | noun | gender=f; plural=cabeças; pron=/kɐˈbɛ.sɐ/ | A minha cabeça dói. | My head hurts.
+olho | eye | noun | gender=m; plural=olhos; f=olheira (dark circle); pron=/ˈo.ʎu/ | Os olhos castanhos. | Brown eyes.
+ouvido | ear | noun | gender=m; plural=ouvidos; pron=/uˈvi.du/ | Ouve com os ouvidos. | He listens with his ears.
+nariz | nose | noun | gender=m; plural=narizes; pron=/nɐˈɾiʃ/ | O nariz está tapado. | My nose is blocked.
+boca | mouth | noun | gender=f; plural=bocas; pron=/ˈbɔ.kɐ/ | Abre a boca, por favor. | Open your mouth, please.
+dente | tooth | noun | gender=m; plural=dentes; pron=/ˈdẽ.tə/ | O dente dói muito. | The tooth hurts a lot.
+mão | hand | noun | gender=f; plural=mãos; note=common irregular gender/plural; pron=/mɐ̃w/ | Dá-me a mão. | Give me your hand.
+braço | arm | noun | gender=m; plural=braços; pron=/ˈbɾa.su/ | O braço está ferido. | The arm is injured.
+perna | leg | noun | gender=f; plural=pernas; pron=/ˈpɛɾ.nɐ/ | A perna está cansada. | The leg is tired.
+pé | foot | noun | gender=m; plural=pés; pron=/pɛ/ | Os pés doem depois de correr. | The feet hurt after running.
+coração | heart | noun | gender=m; plural=corações; pron=/kuɾɐˈsɐ̃w/ | O coração bate rápido. | The heart beats fast.
+dedo | finger | noun | gender=m; plural=dedos; pron=/ˈde.du/ | Magoei o dedo. | I hurt my finger.
+
+# ── NOUNS: HOME & OBJECTS (14) ─────────────────────────────────
+casa | house / home | noun | gender=f; plural=casas; pron=/ˈka.zɐ/ | A casa é grande e clara. | The house is big and bright.
+quarto | bedroom | noun | gender=m; plural=quartos; note=also "fourth"; pron=/ˈkwaɾ.tu/ | O quarto está limpo. | The bedroom is clean.
+cozinha | kitchen | noun | gender=f; plural=cozinhas; pron=/kuˈzi.ɲɐ/ | A comida está na cozinha. | The food is in the kitchen.
+porta | door | noun | gender=f; plural=portas; pron=/ˈpɔɾ.tɐ/ | Fecha a porta, por favor. | Close the door, please.
+janela | window | noun | gender=f; plural=janelas; pron=/ʒɐˈnɛ.lɐ/ | Abre a janela. | Open the window.
+mesa | table | noun | gender=f; plural=mesas; pron=/ˈmɛ.zɐ/ | A mesa é de madeira. | The table is wooden.
+cadeira | chair | noun | gender=f; plural=cadeiras; pron=/kɐˈdej.ɾɐ/ | A cadeira está ali. | The chair is over there.
+cama | bed | noun | gender=f; plural=camas; pron=/ˈkɐ.mɐ/ | A cama é confortável. | The bed is comfortable.
+carro | car | noun | gender=m; plural=carros; note=BR "carro", PT also "automóvel"; pron=/ˈka.ku/ | O carro é novo. | The car is new.
+chave | key | noun | gender=f; plural=chaves; pron=/ˈʃa.və/ | A chave está na mesa. | The key is on the table.
+livro | book | noun | gender=m; plural=livros; pron=/ˈli.vɾu/ | O livro é interessante. | The book is interesting.
+telefone | phone | noun | gender=m; plural=telefones; pron=/tɛlɛˈfoni/ | O telefone tocou. | The phone rang.
+dinheiro | money | noun | gender=m; note=invariable; pron=/diˈnɐj.ɾu/ | Não tenho dinheiro. | I have no money.
+relógio | watch / clock | noun | gender=m; plural=relógios; pron=/ʁɛˈɫɔ.ʒu/ | O relógio está parado. | The clock has stopped.
+
+# ── NOUNS: PLACES (12) ─────────────────────────────────────────
+cidade | city | noun | gender=f; plural=cidades; pron=/siˈdɐ.də/ | A cidade é bonita. | The city is beautiful.
+rua | street | noun | gender=f; plural=ruas; pron=/ˈʁu.ɐ/ | A rua é comprida. | The street is long.
+loja | shop | noun | gender=f; plural=lojas; pron=/ˈlo.ʒɐ/ | A loja está aberta. | The shop is open.
+escola | school | noun | gender=f; plural=escolas; pron=/ɨʃˈko.lɐ/ | A escola fica perto. | The school is nearby.
+hospital | hospital | noun | gender=m; plural=hospitais; pron=/oʃpiˈtal/ | O hospital é novo. | The hospital is new.
+praia | beach | noun | gender=f; plural=praias; pron=/ˈpɾaj.ɐ/ | Vamos à praia amanhã? | Shall we go to the beach tomorrow?
+rio | river | noun | gender=m; plural=rios; pron=/ˈʁi.u/ | O rio é profundo. | The river is deep.
+país | country | noun | gender=m; plural=países; pron=/pɐˈis/ | Portugal é um país bonito. | Portugal is a beautiful country.
+igreja | church | noun | gender=f; plural=igrejas; pron=/iˈɡɾɛ.ʒɐ/ | A igreja é antiga. | The church is old.
+restaurante | restaurant | noun | gender=m; plural=restaurantes; pron=/ʁɛʃtɔˈɾɐ̃.tə/ | Jantamos no restaurante. | We dine at the restaurant.
+mercado | market | noun | gender=m; plural=mercados; pron=/mɛɾˈka.du/ | Compro fruta no mercado. | I buy fruit at the market.
+estação | station | noun | gender=f; plural=estações; pron=/ɨʃtɐˈsɐ̃w/ | A estação fica longe daqui. | The station is far from here.
+
+# ── NOUNS: TIME (8) ────────────────────────────────────────────
+dia | day | noun | gender=m; plural=dias; pron=/ˈdi.ɐ/ | Hoje é um bom dia. | Today is a good day.
+noite | night | noun | gender=f; plural=noites; pron=/ˈnoj.tə/ | Boa noite, até amanhã. | Good night, see you tomorrow.
+manhã | morning | noun | gender=f; plural=manhãs; pron=/mɐˈɲɐ̃/ | De manhã bebo café. | In the morning I drink coffee.
+tarde | afternoon | noun | gender=f; plural=tardes; note=also "late" (adv.); pron=/ˈtaɾ.də/ | Até à tarde! | See you in the afternoon!
+semana | week | noun | gender=f; plural=semanas; pron=/sɨˈmɐ.nɐ/ | Trabalho cinco dias por semana. | I work five days a week.
+mês | month | noun | gender=m; plural=meses; pron=/mɛʃ/ | O mês tem quatro semanas. | The month has four weeks.
+ano | year | noun | gender=m; plural=anos; pron=/ˈa.nu/ | Tenho trinta anos. | I am thirty years old.
+hora | hour / o'clock | noun | gender=f; plural=horas; pron=/ˈɔ.ɾɐ/ | São três horas. | It is three o'clock.
+
+# ── NOUNS: NATURE & ANIMALS (16) ───────────────────────────────
+sol | sun | noun | gender=m; plural=sóis; pron=/soɫ/ | O sol brilha hoje. | The sun shines today.
+lua | moon | noun | gender=f; plural=luas; pron=/ˈlu.ɐ/ | A lua está cheia. | The moon is full.
+estrela | star | noun | gender=f; plural=estrelas; pron=/ɨʃˈtɾɛ.lɐ/ | Vejo muitas estrelas. | I see many stars.
+árvore | tree | noun | gender=f; plural=árvores; pron=/ˈaɾ.vu.ɾə/ | A árvore é muito alta. | The tree is very tall.
+flor | flower | noun | gender=f; plural=flores; pron=/floɾ/ | A flor é bonita. | The flower is beautiful.
+vento | wind | noun | gender=m; plural=ventos; pron=/ˈvẽ.tu/ | O vento está forte. | The wind is strong.
+chuva | rain | noun | gender=f; plural=chuvas; pron=/ˈʃu.vɐ/ | A chuva cai muito aqui. | It rains a lot here.
+neve | snow | noun | gender=f; note=invariable; pron=/ˈnɛ.və/ | A neve está fria. | The snow is cold.
+fogo | fire | noun | gender=m; plural=fogos; pron=/ˈfo.ɡu/ | O fogo aquece a casa. | The fire heats the house.
+terra | earth / land | noun | gender=f; plural=terras; pron=/ˈtɛ.ʁɐ/ | A terra é redonda. | The earth is round.
+gato | cat | noun | gender=m; plural=gatos; f=gata; pron=/ˈɡa.tu/ | O gato dorme no sofá. | The cat sleeps on the sofa.
+cachorro | dog | noun | gender=m; plural=cachorros; f=cachorra; note=BR cachorro, PT standard cão; pron=/kɐˈʃo.ku/ | O cachorro late à noite. | The dog barks at night.
+pássaro | bird | noun | gender=m; plural=pássaros; pron=/ˈpa.sɐ.ɾu/ | O pássaro voa alto. | The bird flies high.
+cavalo | horse | noun | gender=m; plural=cavalos; pron=/ˈka.vɐ.lu/ | O cavalo corre no campo. | The horse runs in the field.
+vaca | cow | noun | gender=f; plural=vacas; pron=/ˈvɐ.kɐ/ | A vaca come erva. | The cow eats grass.
+rato | mouse | noun | gender=m; plural=ratos; note=also "rat"; pron=/ˈʁa.tu/ | O rato é pequeno. | The mouse is small.
+
+# ── NOUNS: EVERYDAY ABSTRACT (6) ───────────────────────────────
+trabalho | work / job | noun | gender=m; plural=trabalhos; pron=/tɾɐˈba.ʎu/ | O trabalho começa às nove. | Work starts at nine.
+música | music | noun | gender=f; plural=músicas; pron=/ˈmu.zi.kɐ/ | Gosto muito de música. | I like music a lot.
+palavra | word | noun | gender=f; plural=palavras; pron=/pɐˈla.vɾɐ/ | Esta palavra é difícil. | This word is hard.
+pergunta | question | noun | gender=f; plural=perguntas; pron=/pɨɾˈɡũ.tɐ/ | Tenho uma pergunta. | I have a question.
+nome | name | noun | gender=m; plural=nomes; pron=/ˈno.mə/ | O meu nome é João. | My name is João.
+vida | life | noun | gender=f; plural=vidas; pron=/ˈvi.dɐ/ | A vida é bela. | Life is beautiful.
+
+# ── VERBS (36, present tense) ──────────────────────────────────
+ser | to be (permanent) | verb | conj=eu sou, tu és, ele é, nós somos, vocês são, eles são; note=identity, origin, profession | Ele é professor. | He is a teacher.
+estar | to be (state/place) | verb | conj=eu estou, tu estás, ele está, nós estamos, vocês estão, eles estão; note=location, moods, temporary states | Eu estou em casa. | I am at home.
+ter | to have | verb | conj=eu tenho, tu tens, ele tem, nós temos, vocês têm, eles têm; note=also "to be [age]" | Tenho vinte anos. | I am twenty years old.
+ir | to go | verb | conj=eu vou, tu vais, ele vai, nós vamos, vocês vão, eles vão; note=ir + a = going to | Vamos ao mercado. | We are going to the market.
+vir | to come | verb | conj=eu venho, tu vens, ele vem, nós vemos, vocês vêm, eles vêm | Venho aqui todos os dias. | I come here every day.
+fazer | to do / to make | verb | conj=eu faço, tu fazes, ele faz, nós fazemos, vocês fazem, eles fazem | O que fazes? | What are you doing?
+dizer | to say / to tell | verb | conj=eu digo, tu dizes, ele diz, nós dizemos, vocês dizem, eles dizem | Ele diz a verdade. | He tells the truth.
+falar | to speak | verb | conj=eu falo, tu falas, ele fala, nós falamos, vocês falam, eles falam | Eu falo português. | I speak Portuguese.
+comer | to eat | verb | conj=eu como, tu comes, ele come, nós comemos, vocês comem, eles comem | Comemos às sete horas. | We eat at seven o'clock.
+beber | to drink | verb | conj=eu bebo, tu bebes, ele bebe, nós bebemos, vocês bebem, eles bebem | Bebo água todos os dias. | I drink water every day.
+dormir | to sleep | verb | conj=eu durmo, tu dormes, ele dorme, nós dormimos, vocês dormem, eles dormem | Durmo oito horas. | I sleep eight hours.
+querer | to want | verb | conj=eu quero, tu queres, ele quer, nós queremos, vocês querem, eles querem | Quero um café. | I want a coffee.
+precisar | to need | verb | conj=eu preciso, tu precisas, ele precisa, nós precisamos, vocês precisam, eles precisam; note=precisar de + noun | Preciso de ajuda. | I need help.
+gostar | to like | verb | conj=eu gosto, tu gostas, ele gosta, nós gostamos, vocês gostam, eles gostam; note=gostar de + noun | Gosto de música. | I like music.
+amar | to love | verb | conj=eu amo, tu amas, ele ama, nós amamos, vocês amam, eles amam | Amo a minha família. | I love my family.
+ver | to see | verb | conj=eu vejo, tu vês, ele vê, nós vemos, vocês veem, eles veem | Vejo a lua. | I see the moon.
+ouvir | to hear / to listen | verb | conj=eu ouço, tu ouves, ele ouve, nós ouvimos, vocês ouvem, eles ouvem | Ouvem-se pássaros. | Birds can be heard.
+ler | to read | verb | conj=eu leio, tu lês, ele lê, nós lemos, vocês leem, eles leem | Leio um livro por semana. | I read a book a week.
+escrever | to write | verb | conj=eu escrevo, tu escreves, ele escreve, nós escrevemos, vocês escrevem, eles escrevem | Escrevo uma carta. | I write a letter.
+saber | to know (fact) | verb | conj=eu sei, tu sabes, ele sabe, nós sabemos, vocês sabem, eles sabem; note=saber + inf. = know how to | Sei a resposta. | I know the answer.
+conhecer | to know (person/place) | verb | conj=eu conheço, tu conheces, ele conhece, nós conhecemos, vocês conhecem, eles conhecem; note=saber = fact, conhecer = familiarity | Conheço Lisboa bem. | I know Lisbon well.
+poder | can / to be able | verb | conj=eu posso, tu podes, ele pode, nós podemos, vocês podem, eles podem | Posso ajudar? | Can I help?
+dever | must / should | verb | conj=eu devo, tu deves, ele deve, nós devemos, vocês devem, eles devem | Deves dormir cedo. | You should sleep early.
+comprar | to buy | verb | conj=eu compro, tu compras, ele compra, nós compramos, vocês compram, eles compram | Compro fruta no mercado. | I buy fruit at the market.
+vender | to sell | verb | conj=eu vendo, tu vendes, ele vende, nós vendemos, vocês vendem, eles vendem | Vendem peixe na praça. | They sell fish at the square.
+trabalhar | to work | verb | conj=eu trabalho, tu trabalhas, ele trabalha, nós trabalhamos, vocês trabalham, eles trabalham | Trabalho numa loja. | I work in a shop.
+estudar | to study | verb | conj=eu estudo, tu estudas, ele estuda, nós estudamos, vocês estudam, eles estudam | Estudo português. | I study Portuguese.
+morar | to live (reside) | verb | conj=eu moro, tu moras, ele mora, nós moramos, vocês moram, eles moram; note=morar em + place | Moro no Porto. | I live in Porto.
+andar | to walk | verb | conj=eu ando, tu andas, ele anda, nós andamos, vocês andam, eles andam; note=also "to be" (informal) | Ando muito a pé. | I walk a lot.
+correr | to run | verb | conj=eu corro, tu corres, ele corre, nós corremos, vocês correm, eles correm | Corro todas as manhãs. | I run every morning.
+jogar | to play (game/sport) | verb | conj=eu jogo, tu jogas, ele joga, nós jogamos, vocês jogam, eles jogam; note=jogar + sport | Jogamos futebol. | We play football.
+ajudar | to help | verb | conj=eu ajudo, tu ajudas, ele ajuda, nós ajudamos, vocês ajudam, eles ajudam | Ajudo a minha mãe. | I help my mother.
+perguntar | to ask | verb | conj=eu pergunto, tu perguntas, ele pergunta, nós perguntamos, vocês perguntam, eles perguntam | Ele pergunta o nome. | He asks the name.
+responder | to answer / to reply | verb | conj=eu respondo, tu respondes, ele responde, nós respondemos, vocês respondem, eles respondem | Respondo à pergunta. | I answer the question.
+abrir | to open | verb | conj=eu abro, tu abres, ele abre, nós abrimos, vocês abrem, eles abrem | Abre a janela! | Open the window!
+fechar | to close | verb | conj=eu fecho, tu fechas, ele fecha, nós fechamos, vocês fecham, eles fecham | Fecha a porta, por favor. | Close the door, please.
+
+# ── ADJECTIVES (20) ────────────────────────────────────────────
+grande | big / large | adj | f=grande; note=invariable | A casa é muito grande. | The house is very big.
+pequeno | small | adj | f=pequena | O gato é pequeno. | The cat is small.
+bom | good | adj | f=boa; pl=bons/boas | O café está bom. | The coffee is good.
+mau | bad | adj | f=ma; note=f. irregular | O tempo está mau. | The weather is bad.
+novo | new | adj | f=nova | O carro é novo. | The car is new.
+velho | old | adj | f=velha; note=for people use "idoso" politely | A casa é velha. | The house is old.
+quente | hot | adj | f=quente; note=invariable | A sopa está quente. | The soup is hot.
+frio | cold | adj | f=fria | O inverno é frio. | Winter is cold.
+bonito | beautiful / pretty | adj | f=bonita | A flor é bonita. | The flower is beautiful.
+rápido | fast / quick | adj | f=rápida | O comboio é rápido. | The train is fast.
+feliz | happy | adj | f=feliz; note=invariable | Estou feliz. | I am happy.
+triste | sad | adj | f=triste; note=invariable | O filme é triste. | The film is sad.
+fácil | easy | adj | f=fácil; note=invariable; note2=stress moves: fácil→facilmente | A pergunta é fácil. | The question is easy.
+difícil | difficult | adj | f=difícil; note=invariable | A palavra é difícil. | The word is difficult.
+caro | expensive | adj | f=carA | O livro é caro. | The book is expensive.
+barato | cheap | adj | f=barata | A cerveja é barata. | The beer is cheap.
+cheio | full | adj | f=cheia | A copa está cheia. | The cup is full.
+vazio | empty | adj | f=vazia | A garrafa está vazia. | The bottle is empty.
+alto | tall / high | adj | f=alta | A árvore é alta. | The tree is tall.
+baixo | short / low | adj | f=baixa | O preço é baixo. | The price is low.
+
+# ── GREETINGS & PHRASES (12) ───────────────────────────────────
+olá | hello | interj | note=BR "oi" (informal) | Olá, como estás? | Hello, how are you?
+bom dia | good morning | phrase | note=fixed phrase, compare boa tarde and boa noite | Bom dia, senhora! | Good morning, ma'am!
+boa tarde | good afternoon | phrase | note=boa agrees with f. tarde | Boa tarde, amigos! | Good afternoon, friends!
+boa noite | good evening / night | phrase | note=used both to greet and to say good night | Boa noite e até amanhã. | Good night and see you tomorrow.
+tchau | bye | phrase | note=from Italian "ciao" | Tchau, até logo! | Bye, see you later!
+obrigado | thank you (m. speaker) | interj | note=f. speakers say "obrigada", plural "obrigado a todos" | Muito obrigado pela ajuda! | Thank you very much for the help!
+por favor | please | phrase | | Um café, por favor. | A coffee, please.
+sim | yes | interj | | Sim, é verdade. | Yes, it's true.
+não | no | interj | note=also weakens requests: "Não faça isso" politely | Não, obrigado. | No, thank you.
+desculpa | sorry / excuse me | interj | note=PT "desculpe" formal, BR "com licença" | Desculpa, estou atrasado. | Sorry, I'm late.
+de nada | you're welcome | phrase | | Obrigado! — De nada! | Thank you! — You're welcome!
+com licença | excuse me (passing) | phrase | note=to get past someone or interrupt | Com licença, onde fica a estação? | Excuse me, where is the station?
+
+# ── ADVERBS (10) ───────────────────────────────────────────────
+aqui | here | adv | note=ali = there (near you), lá = there (far) | Estou aqui. | I am here.
+ali | there | adv | | A loja está ali. | The shop is over there.
+hoje | today | adv | | Hoje é um bom dia. | Today is a good day.
+ontem | yesterday | adv | note=tomorrow = amanhã | Ontem comi peixe. | I ate fish yesterday.
+amanhã | tomorrow | adv | | Amanhã vamos à praia. | Tomorrow we go to the beach.
+sempre | always | adv | note=never = nunca | Sempre bebo café de manhã. | I always drink coffee in the morning.
+nunca | never | adv | | Nunca estou em casa. | I'm never at home.
+também | also / too | adv | note=neither = também não | Eu também falo inglês. | I also speak English.
+muito | a lot / very | adv | note=invariable, adv form muitas vezes | Trabalho muito. | I work a lot.
+pouco | little / few | adv | note=invariable | Falo pouco no início. | I speak little at first.

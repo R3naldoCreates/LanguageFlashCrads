@@ -151,14 +151,22 @@
     },
     count: function (code) { return this.get(code).size; },
     exportAll: function () {
-      var out = {};
+      var out = {}, srs = {}, acc = {};
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
         if (k && k.indexOf(PREFIX + 'tl:') === 0) {
           try { out[k.slice((PREFIX + 'tl:').length)] = JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) {}
+        } else if (k && k.indexOf(PREFIX + 'srs:') === 0) {
+          try { srs[k.slice((PREFIX + 'srs:').length)] = JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) {}
+        } else if (k && k.indexOf(PREFIX + 'acc:') === 0) {
+          try { acc[k.slice((PREFIX + 'acc:').length)] = JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) {}
         }
       }
-      return { app: 'language-flash-cards', version: 1, exported: new Date().toISOString(), tolearn: out };
+      return {
+        app: 'language-flash-cards', version: 2, exported: new Date().toISOString(),
+        tolearn: out, srs: srs, acc: acc,
+        daily: dailyLoad(), goal: getGoal()
+      };
     },
     importMerge: function (data) {
       if (!data || typeof data.tolearn !== 'object' || data.tolearn === null) throw new Error('Not a valid export file');
@@ -170,9 +178,227 @@
         });
         Store.save(code, s);
       });
+      if (data.srs && typeof data.srs === 'object') {
+        Object.keys(data.srs).forEach(function (code) {
+          var cur = srsLoad(code);
+          var inc = data.srs[code] || {};
+          Object.keys(inc).forEach(function (id) {
+            var a = cur[id], b = inc[id];
+            if (!a || (b && b.n > a.n)) cur[id] = b;
+          });
+          srsSave(code, cur);
+        });
+      }
+      if (data.acc && typeof data.acc === 'object') {
+        Object.keys(data.acc).forEach(function (code) {
+          var cur = accLoad(code), inc = data.acc[code] || {};
+          var merged = { right: Math.max(cur.right || 0, inc.right || 0), wrong: Math.max(cur.wrong || 0, inc.wrong || 0) };
+          try { localStorage.setItem(PREFIX + 'acc:' + code, JSON.stringify(merged)); } catch (e) {}
+        });
+      }
+      if (data.daily && typeof data.daily === 'object') {
+        var map = dailyLoad();
+        Object.keys(data.daily).forEach(function (k) {
+          if (!map[k] || (data.daily[k].n || 0) > (map[k].n || 0)) map[k] = data.daily[k];
+        });
+        dailySave(map);
+      }
+      if (data.goal > 0) setGoal(data.goal);
       return changed;
     }
   };
+
+  /* ───────────────── SRS / daily goal / accuracy ─────────────
+     Spaced repetition: each card has a stage 0..5 with growing
+     review intervals. "Known" = stage >= 3. Wrong → stage 0.
+     Daily goal: unique cards studied per day + streak.
+  ─────────────────────────────────────────────────────────── */
+
+  var SRS_INTERVALS = [0, 1, 3, 7, 14, 30]; /* days per stage */
+
+  function srsLoad(code) {
+    try { return JSON.parse(localStorage.getItem(PREFIX + 'srs:' + code) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  function srsSave(code, map) {
+    try { localStorage.setItem(PREFIX + 'srs:' + code, JSON.stringify(map)); } catch (e) {}
+  }
+
+  function srsGet(code, id) {
+    var m = srsLoad(code);
+    return m[id] || { s: 0, d: 0, n: 0 };
+  }
+
+  function srsMark(code, id, ok) {
+    var m = srsLoad(code);
+    var rec = m[id] || { s: 0, d: 0, n: 0 };
+    if (ok) {
+      rec.s = Math.min(5, rec.s + 1);
+      rec.d = Date.now() + SRS_INTERVALS[rec.s] * 86400000;
+    } else {
+      rec.s = 0;
+      rec.d = Date.now();
+    }
+    rec.n++;
+    m[id] = rec;
+    srsSave(code, m);
+  }
+
+  function masteryClass(rec) {
+    if (rec.n === 0) return 'new';
+    if (rec.s >= 3) return 'known';
+    return 'learning';
+  }
+
+  function srsStats(lang) {
+    var code = lang.meta.code;
+    var m = srsLoad(code);
+    var out = { fresh: 0, learning: 0, known: 0, due: 0 };
+    var now = Date.now();
+    lang.entries.forEach(function (e) {
+      var rec = m[e.id];
+      if (!rec || rec.n === 0) { out.fresh++; return; }
+      if (rec.s >= 3) out.known++; else out.learning++;
+      if (rec.d <= now) out.due++;
+    });
+    out.total = lang.entries.length;
+    return out;
+  }
+
+  function dueEntries(lang) {
+    var code = lang.meta.code;
+    var m = srsLoad(code);
+    var now = Date.now();
+    var due = [], fresh = [];
+    lang.entries.forEach(function (e) {
+      var rec = m[e.id];
+      if (!rec || rec.n === 0) { fresh.push(e); return; }
+      if (rec.d <= now) due.push({ e: e, s: rec.s, d: rec.d });
+    });
+    due.sort(function (a, b) { return a.s - b.s || a.d - b.d; });
+    return { due: due.map(function (x) { return x.e; }), fresh: fresh };
+  }
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' +
+      ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+      ('0' + d.getDate()).slice(-2);
+  }
+
+  function dayKey(offset) {
+    var d = new Date();
+    d.setDate(d.getDate() - offset);
+    return d.getFullYear() + '-' +
+      ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+      ('0' + d.getDate()).slice(-2);
+  }
+
+  function dailyLoad() {
+    try { return JSON.parse(localStorage.getItem(PREFIX + 'daily') || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  function dailySave(map) {
+    try {
+      var keys = Object.keys(map);
+      if (keys.length > 90) {
+        keys.sort();
+        keys.slice(0, keys.length - 90).forEach(function (k) { delete map[k]; });
+      }
+      localStorage.setItem(PREFIX + 'daily', JSON.stringify(map));
+    } catch (e) {}
+  }
+
+  /* mark one card studied today (unique per day, counts toward goal) */
+  function markStudy(code, id) {
+    var map = dailyLoad();
+    var key = todayKey();
+    var rec = map[key] || { n: 0, ids: {} };
+    if (!rec.ids) rec.ids = {};
+    if (rec.ids[id]) return rec.n;
+    rec.ids[id] = 1;
+    rec.n++;
+    map[key] = rec;
+    dailySave(map);
+    return rec.n;
+  }
+
+  function todayStudied() {
+    var rec = dailyLoad()[todayKey()];
+    return rec ? (rec.n || 0) : 0;
+  }
+
+  function getGoal() {
+    try {
+      var g = parseInt(localStorage.getItem(PREFIX + 'goal'), 10);
+      return g > 0 ? g : 10;
+    } catch (e) { return 10; }
+  }
+
+  function setGoal(g) {
+    try {
+      if (g > 0) localStorage.setItem(PREFIX + 'goal', String(g));
+      else localStorage.removeItem(PREFIX + 'goal');
+    } catch (e) {}
+  }
+
+  function streakInfo() {
+    var goal = getGoal();
+    var map = dailyLoad();
+    var best = 0, run = 0, i;
+    var keys = Object.keys(map);
+    keys.sort();
+    for (i = 0; i < keys.length; i++) {
+      if ((map[keys[i]].n || 0) >= goal) { run++; if (run > best) best = run; }
+      else run = 0;
+    }
+    var current = 0;
+    var start = (map[dayKey(0)] && (map[dayKey(0)].n || 0) >= goal) ? 0 : 1;
+    if (start === 1 && !(map[dayKey(1)] && (map[dayKey(1)].n || 0) >= goal)) {
+      return { current: 0, best: best, doneToday: map[dayKey(0)] ? (map[dayKey(0)].n || 0) >= goal : false };
+    }
+    for (i = start; i < 400; i++) {
+      var r = map[dayKey(i)];
+      if (r && (r.n || 0) >= goal) current++;
+      else break;
+    }
+    return { current: current, best: best, doneToday: map[dayKey(0)] ? (map[dayKey(0)].n || 0) >= goal : false };
+  }
+
+  function accLoad(code) {
+    try { return JSON.parse(localStorage.getItem(PREFIX + 'acc:' + code) || '{}') || { right: 0, wrong: 0 }; }
+    catch (e) { return { right: 0, wrong: 0 }; }
+  }
+
+  function accAdd(code, ok) {
+    var a = accLoad(code);
+    if (ok) a.right = (a.right || 0) + 1; else a.wrong = (a.wrong || 0) + 1;
+    try { localStorage.setItem(PREFIX + 'acc:' + code, JSON.stringify(a)); } catch (e) {}
+  }
+
+  function getRevPref(code) {
+    try { return localStorage.getItem(PREFIX + 'rev:' + code) === 'on'; } catch (e) { return false; }
+  }
+
+  function setRevPref(code, on) {
+    try {
+      if (on) localStorage.setItem(PREFIX + 'rev:' + code, 'on');
+      else localStorage.removeItem(PREFIX + 'rev:' + code);
+    } catch (e) {}
+  }
+
+  function isRev(l) { return getRevPref(l.meta.code); }
+
+  /* which word is the prompt / which is the answer (reverse mode flips them) */
+  function promptText(l, e) { return isRev(l) ? e.back : e.front; }
+  function answerText(l, e) { return isRev(l) ? e.front : e.back; }
+
+  function normalizeAns(s) {
+    return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim()
+      .replace(/[.!?…]+$/g, '');
+  }
 
   /* ───────────────────────── state ───────────────────────── */
 
@@ -187,7 +413,8 @@
     posFilter: 'all',
     shuffle: true,
     basic: null,
-    test: null
+    test: null,
+    testCfg: { len: 10, src: 'all', typing: false }
   };
 
   function L() { return state.byCode[state.code]; }
@@ -419,6 +646,30 @@
 
   var app = null;
 
+  /* navigate to a view, recording it in browser history so the
+     phone/desktop back button steps through screens instead of
+     leaving the app */
+  function nav(view, push) {
+    state.view = view;
+    if (push !== false) {
+      try { history.pushState({ v: view, code: state.code }, ''); } catch (e) {}
+    }
+    render();
+  }
+
+  function onPopState(ev) {
+    var st = ev.state || { v: 'home', code: null };
+    var v = st.v || 'home';
+    if (st.code) state.code = st.code;
+    if ((v === 'basic' && !state.basic) || (v === 'tol' && !state.tol) ||
+        (v === 'testRun' && !state.test) || (v === 'testResult' && !(state.test && state.test.result)) ||
+        (v === 'stats' && !state.code)) {
+      v = state.code ? 'hub' : 'home';
+    }
+    state.view = v;
+    render();
+  }
+
   function render() {
     var html = '';
     if (state.loadError) html += bannerHTML(state.loadError);
@@ -430,9 +681,15 @@
       case 'testSetup': html += testSetupHTML(); break;
       case 'testRun': html += testRunHTML(); break;
       case 'testResult': html += testResultHTML(); break;
+      case 'stats': html += statsHTML(); break;
       default: html += homeHTML();
     }
     app.innerHTML = html;
+    if (state.view === 'testRun' && state.test &&
+        (state.test.style === 'typing' || state.test.style === 'listen')) {
+      var inp = document.getElementById('typeinput');
+      if (inp) inp.focus();
+    }
   }
 
   function bannerHTML(msg) {
@@ -453,6 +710,14 @@
     var h = '<div class="spacer"></div>';
     h += '<h1 class="home-title">Language Flash Cards</h1>';
     h += '<p class="home-sub">Pick a language. Tap cards to flip, test yourself, clear the To&nbsp;Learn deck.</p>';
+    var st = streakInfo();
+    var goal = getGoal();
+    if (goal > 0 || st.current > 0) {
+      h += '<div class="goalbar">' +
+        (st.current > 0 ? '<span class="streak">🔥 ' + st.current + '-day streak</span>' : '') +
+        '<span class="today">Today: ' + todayStudied() + ' / ' + goal + (st.doneToday ? ' ✓' : '') + '</span>' +
+        '</div>';
+    }
     h += '<div class="home-grid">';
     state.langs.forEach(function (l) {
       var n = Store.count(l.meta.code);
@@ -527,7 +792,32 @@
 
     h += '<div class="chiprow">';
     h += '<button class="chip' + (state.shuffle ? ' active' : '') + '" data-act="shuffle">🔀 Shuffle ' + (state.shuffle ? 'on' : 'off') + '</button>';
+    h += '<button class="chip' + (isRev(l) ? ' active' : '') + '" data-act="rev" title="Practice English → ' + esc(l.meta.name) + '">↺ ' + esc(l.meta.backLabel) + ' → ' + esc(l.meta.frontLabel) + '</button>';
     h += '</div>';
+
+    var sts = srsStats(l);
+    h += '<div class="mastery-row">' +
+      '<div class="mastery-bar">' +
+      '<div class="seg known" style="width:' + (sts.known / sts.total * 100) + '%"></div>' +
+      '<div class="seg learning" style="width:' + (sts.learning / sts.total * 100) + '%"></div>' +
+      '</div>' +
+      '<div class="mastery-labels"><span class="k">★ ' + sts.known + ' known</span>' +
+      '<span class="l">◐ ' + sts.learning + ' learning</span>' +
+      '<span class="n">● ' + sts.fresh + ' new</span>' +
+      '<button class="mini-link" data-act="go-stats">Stats ›</button></div>' +
+      '</div>';
+
+    var st = streakInfo();
+    var goal = getGoal();
+    h += '<div class="goalbar">' +
+      (st.current > 0 ? '<span class="streak">🔥 ' + st.current + '</span>' : '') +
+      '<span class="today">Today: ' + todayStudied() + ' / ' + goal + (st.doneToday ? ' ✓' : '') + '</span>' +
+      '<span class="goalpick">';
+    [5, 10, 20, 30].forEach(function (g) {
+      h += '<button class="chip tiny' + (goal === g ? ' active' : '') + '" data-act="goal" data-g="' + g + '">' + g + '</button>';
+    });
+    h += '</span></div>';
+
     if (speechOK()) {
       var hubLang = l.meta.ttsLang || l.meta.code;
       h += '<div class="section-label">Voice — ' + esc(l.meta.name) + '</div>';
@@ -540,20 +830,28 @@
     }
 
     var pool = entriesFor(l).length;
-    h += '<div class="mode-grid">' +
-      '<button class="mode-btn" data-act="start-basic"><span class="ico">🃏</span><span><span class="t">Flash cards</span><div class="d">See a word, tap to reveal the meaning</div></span></button>' +
+    var due = dueEntries(l);
+    var dueCount = due.due.length;
+    h += '<div class="mode-grid">';
+    if (dueCount > 0) {
+      h += '<button class="mode-btn due" data-act="start-due"><span class="ico">⏰</span><span><span class="t">Due today (' + dueCount + ')</span><div class="d">Smart review — hardest first, then new words</div></span></button>';
+    }
+    h += '<button class="mode-btn" data-act="start-basic"><span class="ico">🃏</span><span><span class="t">Flash cards</span><div class="d">See a word, tap to reveal the meaning</div></span></button>' +
       '<button class="mode-btn" data-act="go-testsetup"><span class="ico">📝</span><span><span class="t">Test me</span><div class="d">10 / 20 / 30 cards · score + wrong words go to To Learn</div></span></button>' +
       '<button class="mode-btn" data-act="start-tol"><span class="ico">⭐</span><span><span class="t">To Learn (' + tl + ')</span><div class="d">Drill only your weak cards</div></span></button>' +
+      '<button class="mode-btn" data-act="start-listen"><span class="ico">🎧</span><span><span class="t">Listen</span><div class="d">Hear the word, type what it means</div></span></button>' +
       '</div>';
     h += '<p class="home-foot">Current filter: ' +
       (state.posFilter === 'all' ? 'all word types' : esc(posLabel(l, state.posFilter))) +
-      ' · ' + pool + ' card(s) in pool</p>';
+      ' · ' + pool + ' card(s) in pool' +
+      (isRev(l) ? ' · ↺ reversed (EN → ' + esc(l.meta.name) + ')' : '') +
+      '</p>';
     return h;
   }
 
   function topbarHTML(title, sub, showBack) {
     var h = '<div class="topbar">';
-    if (showBack !== false) h += '<button class="backbtn" data-act="go-home" aria-label="Back">←</button>';
+    if (showBack !== false) h += '<button class="backbtn" data-act="back" aria-label="Back">←</button>';
     h += '<h1>' + title + (sub ? ' <span class="sub">· ' + esc(sub) + '</span>' : '') + '</h1>';
     if (speechOK()) {
       h += '<button class="backbtn" data-act="speak-pref" title="Mute / unmute audio" aria-label="Toggle audio">' + (getSpeakPref() ? '🔊' : '🔇') + '</button>';
@@ -571,6 +869,10 @@
     opts = opts || {};
     var starred = Store.has(l.meta.code, e.id);
     var ttsCode = esc(l.meta.ttsLang || l.meta.code);
+    var rec = srsGet(l.meta.code, e.id);
+    var mcls = masteryClass(rec);
+    var mGlyph = mcls === 'known' ? '★' : (mcls === 'learning' ? '◐' : '●');
+    var word = promptText(l, e);
     var h = '<div class="face front">';
     h += '<div class="face-top">';
     if (speechOK()) {
@@ -578,11 +880,12 @@
     } else {
       h += '<span></span>';
     }
+    h += '<span class="mastery m-' + mcls + '" title="' + mcls + '">' + mGlyph + '</span>';
     if (opts.star !== false) {
       h += '<button class="star' + (starred ? ' on' : '') + '" data-act="star" data-id="' + esc(e.id) + '" aria-label="To Learn">' + (starred ? '★' : '☆') + '</button>';
     }
     h += '</div>';
-    h += '<div class="word">' + esc(e.front) + '</div>';
+    h += '<div class="word">' + esc(word) + '</div>';
     h += '<div class="pos-line">' + esc(posLabel(l, e.pos)) +
       (featVal(e, 'pron') ? ' · ' + esc(featVal(e, 'pron')) : '') + '</div>';
     h += '<div class="hint">tap to flip' + (speechOK() ? ' · 🔊 to hear' : '') + '</div>';
@@ -591,9 +894,10 @@
   }
 
   function backFaceHTML(l, e) {
+    var rev = isRev(l);
     var h = '<div class="face back">';
-    h += '<div class="back-head"><div class="back-word">' + esc(e.front) + '</div></div>';
-    h += '<div class="back-meaning">' + esc(e.back) + '</div>';
+    h += '<div class="back-head"><div class="back-word">' + esc(rev ? e.back : e.front) + '</div></div>';
+    h += '<div class="back-meaning">' + esc(rev ? e.front : e.back) + '</div>';
 
     var chips = '', forms = '';
     e.features.forEach(function (f) {
@@ -636,7 +940,7 @@
     var e = sess.deck[sess.i];
     var title = mode === 'tol' ? '⭐ To Learn' : '🃏 Flash cards';
     var h = topbarHTML(title, (sess.i + 1) + ' / ' + sess.deck.length);
-    h += '<div class="counter" id="counter-line">' + esc(e.front) + ' — ' + (sess.flipped ? esc(e.back) : '?') + '</div>';
+    h += '<div class="counter" id="counter-line">' + esc(promptText(l, e)) + ' — ' + (sess.flipped ? esc(answerText(l, e)) : '?') + '</div>';
     h += '<div class="card-scene"><div class="card' + (sess.flipped ? ' flipped' : '') + '" data-act="flip">' +
       frontFaceHTML(l, e, { star: mode === 'basic' }) +
       backFaceHTML(l, e) +
@@ -675,9 +979,17 @@
       '<button class="btn' + (cfg.src === 'all' ? ' primary' : '') + '" data-act="test-src" data-src="all">All words<span class="d" style="font-size:12px;color:var(--text-dim)"> (' + pool + ' under filter)</span></button>' +
       '<button class="btn' + (cfg.src === 'tl' ? ' primary' : '') + '" data-act="test-src" data-src="tl">To Learn<span class="d" style="font-size:12px;color:var(--text-dim)"> (' + tlPool + ')</span></button>' +
       '</div>';
+    h += '<div class="section-label">How to answer</div><div class="pickrow">' +
+      '<button class="btn' + (!cfg.typing ? ' primary' : '') + '" data-act="test-typing" data-typing="0">Flip &amp; choose</button>' +
+      '<button class="btn' + (cfg.typing ? ' primary' : '') + '" data-act="test-typing" data-typing="1">✏️ Type it</button>' +
+      '</div>';
     h += '<div style="height:12px"></div>';
     h += '<button class="btn primary block" data-act="test-start" style="min-height:56px">Start test</button>';
-    h += '<p class="home-foot">Flip each card, then honestly mark ✗ Wrong or ✓ Knew it. Wrong cards join To Learn; cards you now know leave it.</p>';
+    h += '<p class="home-foot">' +
+      (cfg.typing
+        ? 'Type the answer shown on the card and press Enter. Wrong answers show the solution, then move on.'
+        : 'Flip each card, then honestly mark ✗ Wrong or ✓ Knew it.') +
+      ' Wrong cards join To Learn; cards you now know leave it.</p>';
     return h;
   }
 
@@ -693,15 +1005,49 @@
     var e = t.deck[t.i];
     var done = t.right.length + t.wrong.length;
     var pct = Math.round((done / t.deck.length) * 100);
+    var style = t.style || 'flip';
+    var title = style === 'listen' ? '🎧 Listen' : '📝 Test';
 
-    var h = topbarHTML('📝 Test', (t.i + 1) + ' / ' + t.deck.length);
+    var h = topbarHTML(title, (t.i + 1) + ' / ' + t.deck.length);
     h += '<div class="progressbar"><div style="width:' + pct + '%"></div></div>';
     h += '<div class="counter" id="counter-line">✓ ' + t.right.length + ' · ✗ ' + t.wrong.length + '</div>';
-    h += '<div class="card-scene"><div class="card' + (t.flipped ? ' flipped' : '') + '" data-act="flip">' +
-      frontFaceHTML(l, e, { star: false }) +
-      backFaceHTML(l, e) +
-      '</div></div>';
-    h += '<div id="test-actions">' + testActionsHTML() + '</div>';
+
+    if (style === 'flip') {
+      h += '<div class="card-scene"><div class="card' + (t.flipped ? ' flipped' : '') + '" data-act="flip">' +
+        frontFaceHTML(l, e, { star: false }) +
+        backFaceHTML(l, e) +
+        '</div></div>';
+      h += '<div id="test-actions">' + testActionsHTML() + '</div>';
+      return h;
+    }
+
+    /* typing & listening share the input flow */
+    if (style === 'listen') {
+      h += '<div class="listen-box">';
+      h += '<button class="listen-btn" data-act="replay" aria-label="Play the word">🔊</button>';
+      h += '<div class="listen-hint">What does it mean in ' + esc(l.meta.backLabel) + '?</div>';
+      h += '<button class="btn small ghost" data-act="replay">▶ Play again</button>';
+      h += '</div>';
+    } else {
+      h += '<div class="card-scene"><div class="card show-front">' +
+        frontFaceHTML(l, e, { star: false }) +
+        '</div></div>';
+      h += '<div class="listen-hint">Type the ' + (isRev(l) ? esc(l.meta.frontLabel) : esc(l.meta.backLabel)) + ' meaning</div>';
+    }
+
+    if (t.fb) {
+      h += '<div class="fb ' + (t.fb.ok ? 'good' : 'bad') + '">' +
+        (t.fb.ok ? '✓ Correct!' : '✗ Wrong — it was “' + esc(t.fb.expected) + '”') +
+        (t.fb.ok ? '' : '<div class="fb-you">you typed: “' + esc(t.fb.you) + '”</div>') +
+        '</div>';
+      h += '<button class="btn block" data-act="fb-next">' + (t.i + 1 < t.deck.length ? 'Next →' : 'See results') + '</button>';
+    } else {
+      h += '<div class="typebox">' +
+        '<input id="typeinput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type here…" aria-label="Your answer">' +
+        '<button class="btn primary" data-act="typing-check">Check</button>' +
+        '</div>';
+      h += '<p class="home-foot">Press Enter to check · audio plays automatically' + (style === 'listen' ? ' · tap 🔊 to replay' : '') + '</p>';
+    }
     return h;
   }
 
@@ -746,6 +1092,47 @@
     return h;
   }
 
+  /* ── stats ──────────────────────────────────────────────── */
+
+  function statsHTML() {
+    var l = L();
+    if (!l) { state.view = 'home'; return homeHTML(); }
+    var sts = srsStats(l);
+    var acc = accLoad(l.meta.code);
+    var total = sts.total || 1;
+    var accTotal = (acc.right || 0) + (acc.wrong || 0);
+    var accPct = accTotal ? Math.round((acc.right / accTotal) * 100) : 0;
+    var st = streakInfo();
+    var due = dueEntries(l);
+
+    var h = topbarHTML('📊 ' + esc(l.meta.name) + ' stats');
+    h += '<div class="score-card">' +
+      '<div class="big">' + sts.known + ' / ' + sts.total + '</div>' +
+      '<div class="frac">words known (stage ★3+)</div>' +
+      '<div class="mastery-bar big-bar">' +
+      '<div class="seg known" style="width:' + (sts.known / total * 100) + '%"></div>' +
+      '<div class="seg learning" style="width:' + (sts.learning / total * 100) + '%"></div>' +
+      '</div>' +
+      '<div class="mastery-labels"><span class="k">★ ' + sts.known + '</span>' +
+      '<span class="l">◐ ' + sts.learning + '</span>' +
+      '<span class="n">● ' + sts.fresh + '</span></div>' +
+      '</div>';
+
+    h += '<div class="statgrid">' +
+      '<div class="statbox"><div class="v">' + accPct + '%</div><div class="l">accuracy (' + accTotal + ' answers)</div></div>' +
+      '<div class="statbox"><div class="v">' + due.due.length + '</div><div class="l">due now</div></div>' +
+      '<div class="statbox"><div class="v">' + todayStudied() + ' / ' + getGoal() + '</div><div class="l">today vs goal</div></div>' +
+      '<div class="statbox"><div class="v">🔥 ' + st.current + '</div><div class="l">streak (best ' + st.best + ')</div></div>' +
+      '</div>';
+
+    h += '<div class="section-label">How SRS works</div>';
+    h += '<p class="home-foot">Cards you answer correctly move up a stage with longer gaps (today → 3d → 7d → 14d → 30d). ' +
+      'Cards you get wrong drop back to stage 0 and reappear in <b>Due today</b>. ★ = stage 3+ counts as known. ' +
+      'Daily goal counts unique words studied across all modes.</p>';
+    h += '<button class="btn block" data-act="go-hub">Back</button>';
+    return h;
+  }
+
   /* ───────────────────────── sessions ────────────────────── */
 
   function startBasic() {
@@ -753,7 +1140,7 @@
     var deck = entriesFor(l);
     if (state.shuffle) deck = shuffleArr(deck);
     state.basic = { deck: deck, i: 0, flipped: false };
-    state.view = 'basic';
+    nav('basic');
   }
 
   function startTol() {
@@ -761,29 +1148,87 @@
     var deck = tolearnEntries(l);
     if (state.shuffle) deck = shuffleArr(deck);
     state.tol = { deck: deck, i: 0, flipped: false };
-    state.view = 'tol';
+    nav('tol');
+  }
+
+  function startDue() {
+    var l = L();
+    var d = dueEntries(l);
+    var deck = d.due.concat(state.shuffle ? shuffleArr(d.fresh) : d.fresh);
+    if (!deck.length) {
+      showToast('Nothing due — all caught up 🎉');
+      return;
+    }
+    state.basic = { deck: deck, i: 0, flipped: false };
+    nav('basic');
   }
 
   function startTest() {
     var l = L();
-    var cfg = state.testCfg || { len: 10, src: 'all' };
+    var cfg = state.testCfg || { len: 10, src: 'all', typing: false };
     var pool = cfg.src === 'tl' ? tolearnEntries(l) : entriesFor(l);
     if (state.shuffle) pool = shuffleArr(pool);
     var deck = pool.slice(0, cfg.len);
-    state.test = { deck: deck, i: 0, flipped: false, right: [], wrong: [], result: null };
-    state.view = 'testRun';
+    state.test = {
+      deck: deck, i: 0, flipped: false, right: [], wrong: [],
+      result: null, style: cfg.typing ? 'typing' : 'flip', fb: null
+    };
+    nav('testRun');
+    if (!cfg.typing) speakCurrent();
+  }
+
+  function startListen() {
+    var l = L();
+    var lang = l.meta.ttsLang || l.meta.code;
+    if (!speechOK() || voiceMissing(lang)) {
+      showToast('No ' + l.meta.name + ' voice on this device — Listen mode needs audio');
+      return;
+    }
+    var pool = entriesFor(l);
+    if (state.shuffle) pool = shuffleArr(pool);
+    state.test = {
+      deck: pool.slice(0, 15), i: 0, flipped: true, right: [], wrong: [],
+      result: null, style: 'listen', fb: null
+    };
+    nav('testRun');
+    trySpeak(pool[0].front, lang, l.meta.code, l.meta.name, true);
   }
 
   function answer(ok) {
     var t = state.test;
+    var l = L();
     var e = t.deck[t.i];
     if (ok) t.right.push(e); else t.wrong.push(e);
+    srsMark(l.meta.code, e.id, ok);
+    accAdd(l.meta.code, ok);
+    markStudy(l.meta.code, e.id);
     t.flipped = false;
+    t.fb = null;
     if (t.i + 1 < t.deck.length) {
       t.i++;
     } else {
       finishTest();
     }
+  }
+
+  function checkTyped() {
+    var t = state.test;
+    var l = L();
+    if (!t || t.fb) return;
+    var inp = document.getElementById('typeinput');
+    var val = inp ? inp.value : '';
+    if (!String(val).trim()) return;
+    var expected = answerText(l, t.deck[t.i]);
+    var ok = normalizeAns(val) === normalizeAns(expected);
+    t.fb = { ok: ok, you: val, expected: expected };
+    render();
+    setTimeout(function () {
+      if (state.view === 'testRun' && state.test === t && t.fb) {
+        answer(ok);
+        render();
+        speakCurrent();
+      }
+    }, 1800);
   }
 
   function finishTest() {
@@ -797,16 +1242,19 @@
       if (Store.remove(code, e.id)) cleared.push(e);
     });
     state.test.result = { right: state.test.right, wrong: state.test.wrong, added: added, cleared: cleared };
-    state.view = 'testResult';
+    nav('testResult');
   }
 
   function retryWrong() {
     var t = state.test;
+    var style = t.style || 'flip';
     state.test = {
       deck: shuffleArr(t.result.wrong),
-      i: 0, flipped: false, right: [], wrong: [], result: null
+      i: 0, flipped: style === 'listen', right: [], wrong: [], result: null,
+      style: style, fb: null
     };
-    state.view = 'testRun';
+    nav('testRun');
+    speakCurrent();
   }
 
   function move(dir) {
@@ -874,23 +1322,42 @@
       case 'reload':
         loadAll().then(function () { render(); });
         return;
+      case 'back':
+        if (history.state && history.state.v) history.back();
+        else nav(state.code ? 'hub' : 'home');
+        return;
       case 'go-home':
-        state.view = 'home'; render(); return;
+        nav('home'); return;
       case 'go-hub':
-        state.view = 'hub'; render(); return;
+        nav('hub'); return;
+      case 'go-stats':
+        nav('stats'); return;
       case 'go-lang':
         state.code = el.getAttribute('data-code');
         state.posFilter = 'all';
-        state.view = 'hub';
-        render(); return;
+        nav('hub');
+        return;
       case 'filter':
         state.posFilter = el.getAttribute('data-pos');
         render(); return;
       case 'shuffle':
         state.shuffle = !state.shuffle;
         render(); return;
-      case 'start-basic': startBasic(); render(); speakCurrent(); return;
-      case 'start-tol': startTol(); render(); speakCurrent(); return;
+      case 'rev': {
+        var lr = L();
+        setRevPref(lr.meta.code, !isRev(lr));
+        showToast(isRev(lr) ? '↺ Reversed: ' + lr.meta.backLabel + ' → ' + lr.meta.frontLabel : '↺ Normal order');
+        render(); return;
+      }
+      case 'goal': {
+        var g = parseInt(el.getAttribute('data-g'), 10);
+        setGoal(g);
+        render(); return;
+      }
+      case 'start-basic': startBasic(); speakCurrent(); return;
+      case 'start-tol': startTol(); speakCurrent(); return;
+      case 'start-due': startDue(); speakCurrent(); return;
+      case 'start-listen': startListen(); return;
       case 'speak':
         trySpeak(
           el.getAttribute('data-text') || '',
@@ -909,18 +1376,41 @@
         if (nowOn) speakCurrent();
         return;
       }
-      case 'go-testsetup': state.view = 'testSetup'; render(); return;
+      case 'go-testsetup': nav('testSetup'); return;
       case 'test-len':
-        state.testCfg = state.testCfg || { len: 10, src: 'all' };
+        state.testCfg = state.testCfg || { len: 10, src: 'all', typing: false };
         state.testCfg.len = parseInt(el.getAttribute('data-n'), 10);
         render(); return;
       case 'test-src':
-        state.testCfg = state.testCfg || { len: 10, src: 'all' };
+        state.testCfg = state.testCfg || { len: 10, src: 'all', typing: false };
         state.testCfg.src = el.getAttribute('data-src');
         render(); return;
-      case 'test-start': startTest(); render(); speakCurrent(); return;
+      case 'test-typing':
+        state.testCfg = state.testCfg || { len: 10, src: 'all', typing: false };
+        state.testCfg.typing = el.getAttribute('data-typing') === '1';
+        render(); return;
+      case 'test-start': startTest(); return;
+      case 'typing-check': checkTyped(); return;
+      case 'fb-next': {
+        var t = state.test;
+        if (t && t.fb) {
+          var ok = t.fb.ok;
+          answer(ok);
+          render();
+          speakCurrent();
+        }
+        return;
+      }
+      case 'replay': {
+        var l = L();
+        var t2 = state.test;
+        if (l && t2 && t2.deck[t2.i]) {
+          trySpeak(t2.deck[t2.i].front, l.meta.ttsLang || l.meta.code, l.meta.code, l.meta.name, true);
+        }
+        return;
+      }
       case 'answer': answer(el.getAttribute('data-ok') === '1'); render(); speakCurrent(); return;
-      case 'retry-wrong': retryWrong(); render(); speakCurrent(); return;
+      case 'retry-wrong': retryWrong(); return;
       case 'flip': flipCard(); return;
       case 'next': move(1); render(); speakCurrent(); return;
       case 'prev': move(-1); render(); speakCurrent(); return;
@@ -955,9 +1445,11 @@
     var card = document.querySelector('.card');
     if (card) card.classList.toggle('flipped', sess.flipped);
     var counter = document.getElementById('counter-line');
-    if (counter && (state.view === 'basic' || state.view === 'tol')) {
+    var l = L();
+    if (counter && l && (state.view === 'basic' || state.view === 'tol')) {
       var e = sess.deck[sess.i];
-      counter.textContent = e.front + ' — ' + (sess.flipped ? e.back : '?');
+      counter.textContent = promptText(l, e) + ' — ' + (sess.flipped ? answerText(l, e) : '?');
+      if (sess.flipped) markStudy(l.meta.code, e.id);
     }
     if (state.view === 'testRun') {
       var slot = document.getElementById('test-actions');
@@ -966,6 +1458,13 @@
   }
 
   function handleKeys(ev) {
+    var curTest = state.view === 'testRun' ? state.test : null;
+    if (curTest && (curTest.style === 'typing' || curTest.style === 'listen') && !curTest.fb &&
+        ev.key === 'Enter' && ev.target && ev.target.id === 'typeinput') {
+      ev.preventDefault();
+      checkTyped();
+      return;
+    }
     if (ev.target && /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName)) return;
     var k = ev.key;
     if (state.view === 'basic' || state.view === 'tol') {
@@ -973,6 +1472,11 @@
       else if (k === 'ArrowRight') { ev.preventDefault(); move(1); render(); speakCurrent(); }
       else if (k === 'ArrowLeft') { ev.preventDefault(); move(-1); render(); speakCurrent(); }
     } else if (state.view === 'testRun') {
+      var st = state.test;
+      if (st && (st.style === 'typing' || st.style === 'listen')) {
+        if (k === 'Enter' && !st.fb) { ev.preventDefault(); checkTyped(); }
+        return;
+      }
       if (k === ' ' || k === 'Enter') {
         ev.preventDefault();
         if (state.test && !state.test.flipped) flipCard();
@@ -1028,6 +1532,8 @@
 
     app.addEventListener('click', handleClick);
     document.addEventListener('keydown', handleKeys);
+    window.addEventListener('popstate', onPopState);
+    try { history.replaceState({ v: 'home', code: null }, ''); } catch (e) {}
     document.addEventListener('change', function (ev) {
       var t = ev.target;
       if (t && t.id === 'voicesel' && state.code) {

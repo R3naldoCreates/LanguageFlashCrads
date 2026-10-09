@@ -550,6 +550,157 @@ html, body {
 
 .spacer { flex: 1; }
 
+/* ── SRS / mastery / goal / stats ──────────────────────────── */
+
+.mastery {
+  font-size: 13px;
+  line-height: 1;
+  opacity: .9;
+  padding: 2px 4px;
+}
+.mastery.m-new { color: var(--text-dim); }
+.mastery.m-learning { color: var(--accent); }
+.mastery.m-known { color: var(--star); }
+
+.mastery-row { margin: 10px 0 6px; }
+.mastery-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.mastery-bar.big-bar { height: 14px; margin-top: 10px; }
+.mastery-bar .seg.known { background: var(--star); }
+.mastery-bar .seg.learning { background: var(--accent); }
+.mastery-labels {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+  align-items: center;
+}
+.mastery-labels .k { color: var(--star); font-weight: 600; }
+.mastery-labels .l { color: var(--accent); font-weight: 600; }
+.mastery-labels .n { font-weight: 600; }
+.mini-link {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.goalbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin: 8px 0;
+  font-size: 14px;
+}
+.goalbar .streak { font-weight: 700; }
+.goalbar .today { color: var(--text-dim); }
+.goalpick { display: flex; gap: 6px; margin-left: auto; }
+.chip.tiny { padding: 4px 10px; font-size: 12px; min-height: 32px; }
+
+.mode-btn.due { border-color: var(--star); background: linear-gradient(180deg, var(--surface), var(--accent-soft)); }
+
+.statgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+.statbox {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+.statbox .v { font-size: 22px; font-weight: 800; }
+.statbox .l { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+/* ── typing & listening quiz ───────────────────────────────── */
+
+.card.show-front .face.back { display: none; }
+.card.show-front { position: relative; height: auto; min-height: 200px; }
+.card.show-front .face.front { position: relative; transform: none; }
+
+.listen-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 12px 0;
+  box-shadow: var(--shadow);
+}
+.listen-btn {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 40px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.listen-btn:active { transform: scale(.95); }
+.listen-hint {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 15px;
+  margin: 8px 0;
+}
+
+.typebox {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+.typebox input {
+  flex: 1;
+  min-height: 52px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 17px;
+}
+.typebox input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.typebox .btn { min-height: 52px; padding: 0 18px; }
+
+.fb {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 16px;
+  margin: 10px 0;
+}
+.fb.good { background: var(--good-soft); color: var(--good); }
+.fb.bad { background: var(--bad-soft); color: var(--bad); }
+.fb-you { font-weight: 500; font-size: 13px; margin-top: 4px; opacity: .8; }
+
 /* ── voice picker & toast ──────────────────────────────────── */
 
 .voicesel {

@@ -1,5 +1,5 @@
 /* Language Flash Cards — offline cache (service worker) */
-var CACHE = 'lfc-v3';
+var CACHE = 'lfc-v4';
 var ASSETS = [
   './',
   './index.html',

@@ -664,17 +664,34 @@
     var p;
     try { p = JSON.parse(localStorage.getItem(PREFIX + 'pick:' + code) || '{}'); } catch (e) { p = {}; }
     if (!p || typeof p !== 'object') p = {};
+    var themes = Array.isArray(p.themes) ? p.themes.slice() : [];
+    if (!themes.length && p.theme && p.theme !== 'all') themes = [p.theme];
     return {
       range: String(p.range != null ? p.range : 'all'),
-      theme: p.theme || 'all',
+      themes: themes,
       count: typeof p.count === 'number' ? p.count : 30
     };
   }
 
   function setPick(code, key, val) {
     var p = getPick(code);
-    p[key] = val;
+    if (key === 'themes') p.themes = val;
+    else if (key === 'theme') p.themes = (val && val !== 'all') ? [val] : [];
+    else p[key] = val;
     try { localStorage.setItem(PREFIX + 'pick:' + code, JSON.stringify(p)); } catch (e) {}
+  }
+
+  function getOpenSec() {
+    try {
+      var o = JSON.parse(localStorage.getItem(PREFIX + 'ui:open') || '{}');
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+  }
+
+  function setOpenSec(id, open) {
+    var o = getOpenSec();
+    if (open) o[id] = 1; else delete o[id];
+    try { localStorage.setItem(PREFIX + 'ui:open', JSON.stringify(o)); } catch (e) {}
   }
 
   function themeList(l) {
@@ -701,27 +718,29 @@
   }
 
   /* entries matching a theme + range selection */
-  function poolFor(l, theme, range) {
+  function poolFor(l, themes, range) {
     var from = range === 'all' ? 0 : parseInt(range, 10) * 100;
     var to = from + 100;
+    var sel = Array.isArray(themes) ? themes : (themes && themes !== 'all' ? [themes] : []);
     var pool = [];
     l.entries.forEach(function (e, i) {
       if (from && (i < from || i >= to)) return;
-      if (theme !== 'all' && featVal(e, 'theme') !== theme) return;
+      if (sel.length && sel.indexOf(featVal(e, 'theme')) < 0) return;
       pool.push(e);
     });
     return pool;
   }
 
-  function pickPool(l) { var p = getPick(l.meta.code); return poolFor(l, p.theme, p.range); }
+  function pickPool(l) { var p = getPick(l.meta.code); return poolFor(l, p.themes, p.range); }
 
   function pickSummary(l) {
     var p = getPick(l.meta.code);
     var bits = [];
-    if (p.theme !== 'all') bits.push(themeLabel(p.theme));
-    else bits.push('All themes');
+    if (!p.themes.length) bits.push('All topics');
+    else if (p.themes.length === 1) bits.push(themeLabel(p.themes[0]));
+    else bits.push(p.themes.length + ' topics');
     if (p.range !== 'all') bits.push('words ' + rangeLabel(l, p.range));
-    else bits.push('all words');
+    else bits.push('random from all');
     bits.push(p.count > 0 ? p.count + ' cards' : 'every card');
     return bits.join(' · ');
   }
@@ -729,7 +748,7 @@
   function startPick() {
     var l = L();
     var pool = pickPool(l);
-    if (!pool.length) { showToast('Nothing matches — try another theme or range'); return; }
+    if (!pool.length) { showToast('Nothing matches — try another topic or range'); return; }
     var p = getPick(l.meta.code);
     var deck = state.shuffle ? shuffleArr(pool) : pool.slice();
     if (p.count > 0) deck = deck.slice(0, p.count);
@@ -763,40 +782,63 @@
     var next = null;
     blocks.forEach(function (b) { if (!next && !b.done) next = b; });
 
-    var h = '<div class="section-label">1 · Choose a topic</div><div class="chiprow">';
-    h += '<button class="chip' + (p.theme === 'all' ? ' active' : '') + '" data-act="pick" data-key="theme" data-val="all">All topics <span class="count">' + l.entries.length + '</span></button>';
+    var h = '';
+
+    /* 1 · topics (multi-select) */
+    var topicSum = !p.themes.length ? 'all' :
+      (p.themes.length === 1 ? themeLabel(p.themes[0]) : p.themes.length + ' selected');
+    var topicBody = '<div class="chiprow">';
+    topicBody += '<button class="chip' + (!p.themes.length ? ' active' : '') + '" data-act="pick" data-key="theme" data-val="all">All topics <span class="count">' + l.entries.length + '</span></button>';
     themes.forEach(function (t) {
-      var n = poolFor(l, t, 'all').length;
-      h += '<button class="chip' + (p.theme === t ? ' active' : '') + '" data-act="pick" data-key="theme" data-val="' + esc(t) + '">' +
+      var n = poolFor(l, [t], 'all').length;
+      topicBody += '<button class="chip' + (p.themes.indexOf(t) >= 0 ? ' active' : '') + '" data-act="pick" data-key="theme" data-val="' + esc(t) + '">' +
         esc(themeLabel(t)) + ' <span class="count">' + n + '</span></button>';
     });
-    h += '</div>';
+    topicBody += '</div><p class="home-foot">Tap one or more topics — they combine (e.g. Home + Family).</p>';
+    h += sectionHTML('topic', 1, 'Choose a topic', topicSum, topicBody);
 
-    h += '<div class="section-label">2 · Choose the words</div><div class="chiprow">';
-    h += '<button class="chip' + (p.range === 'all' ? ' active' : '') + '" data-act="pick" data-key="range" data-val="all">Random from all <span class="count">' + l.entries.length + '</span></button>';
+    /* 2 · word range */
+    var rangeSum = p.range === 'all' ? 'random from all' : 'words ' + rangeLabel(l, p.range);
+    var rangeBody = '<div class="chiprow tight">';
+    rangeBody += '<button class="chip' + (p.range === 'all' ? ' active' : '') + '" data-act="pick" data-key="range" data-val="all">Random from all <span class="count">' + l.entries.length + '</span></button>';
     blocks.forEach(function (b) {
-      var n = poolFor(l, p.theme, b.id).length;
-      h += '<button class="chip' + (p.range === b.id ? ' active' : '') + (n === 0 ? ' empty' : '') + '" data-act="pick" data-key="range" data-val="' + b.id + '">' +
+      var n = poolFor(l, p.themes, b.id).length;
+      rangeBody += '<button class="chip' + (p.range === b.id ? ' active' : '') + (n === 0 ? ' empty' : '') + '" data-act="pick" data-key="range" data-val="' + b.id + '">' +
         (b.done ? '✅' : '') + b.from + '–' + b.to +
         ' <span class="count">' + (n === 0 ? '0' : b.known + '★/' + n) + '</span></button>';
     });
-    h += '</div>';
+    rangeBody += '</div>';
+    if (next && p.range === 'all') {
+      rangeBody += '<p class="home-foot">Next unfinished block: <b>words ' + next.from + '–' + next.to + '</b> (★' +
+        next.known + '/' + next.size + ') <button class="mini-link" data-act="use-next" data-b="' + next.id + '">select it</button></p>';
+    }
+    h += sectionHTML('range', 2, 'Choose the words', rangeSum, rangeBody);
 
-    h += '<div class="section-label">3 · How many cards</div><div class="chiprow">';
+    /* 3 · how many */
+    var countBody = '<div class="chiprow tight">';
     COUNT_CHOICES.forEach(function (n) {
-      h += '<button class="chip' + (p.count === n ? ' active' : '') + '" data-act="pick" data-key="count" data-val="' + n + '">' +
+      countBody += '<button class="chip' + (p.count === n ? ' active' : '') + '" data-act="pick" data-key="count" data-val="' + n + '">' +
         (n === 0 ? 'All' : n) + '</button>';
     });
-    h += '</div>';
+    countBody += '</div>';
+    h += sectionHTML('count', 3, 'How many cards', p.count > 0 ? String(p.count) : 'all', countBody);
 
     h += '<div class="picksum">' +
-      (next && (p.range === 'all' || p.range === next.id)
-        ? '<div class="picksug">Next unfinished block: <b>words ' + next.from + '–' + next.to + '</b> (★' + next.known + '/' + next.size + ') ' +
-          '<button class="mini-link" data-act="use-next" data-b="' + next.id + '">select it</button></div>'
-        : '') +
       '<div class="picksum-line">Ready: <b>' + esc(pickSummary(l)) + '</b> · ' + pool.length + ' card(s) match</div>' +
       '</div>';
     h += '<button class="btn primary block" data-act="start-pick" style="min-height:56px">▶ Start studying</button>';
+    return h;
+  }
+
+  function sectionHTML(id, num, title, summary, body) {
+    var open = !!getOpenSec()[id];
+    var h = '<button class="sechead' + (open ? ' open' : '') + '" data-act="toggle-sec" data-sec="' + id + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+      '<span class="secnum">' + num + '</span>' +
+      '<span class="sectitle">' + esc(title) + '</span>' +
+      '<span class="secsum">' + esc(summary) + '</span>' +
+      '<span class="secarrow">' + (open ? '▾' : '▸') + '</span>' +
+      '</button>';
+    if (open) h += '<div class="secbody">' + body + '</div>';
     return h;
   }
 
@@ -1525,7 +1567,25 @@
         var key = el.getAttribute('data-key');
         var val = el.getAttribute('data-val');
         if (key === 'count') val = parseInt(val, 10);
+        if (key === 'theme') {
+          var list = getPick(pl.meta.code).themes.slice();
+          if (val === 'all') {
+            list = [];
+          } else {
+            var idx = list.indexOf(val);
+            if (idx >= 0) list.splice(idx, 1); else list.push(val);
+          }
+          setPick(pl.meta.code, 'themes', list);
+          render();
+          return;
+        }
         setPick(pl.meta.code, key, val);
+        render();
+        return;
+      }
+      case 'toggle-sec': {
+        var sec = el.getAttribute('data-sec');
+        setOpenSec(sec, !getOpenSec()[sec]);
         render();
         return;
       }

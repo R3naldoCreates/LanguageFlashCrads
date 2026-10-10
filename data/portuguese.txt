@@ -364,3 +364,147 @@ Está muito bom. | It's very good (food). | phrase | theme=comida;  note=reply w
 Um café, por favor. | A coffee, please. | phrase | theme=comida | Um café, por favor. | A coffee, please.
 Põe o sal, por favor. | Pass the salt, please. | phrase | theme=comida | Põe o sal, por favor. | Pass the salt, please.
 Obrigado pela refeição. | Thank you for the meal. | phrase | theme=comida | Obrigado pela refeição. | Thank you for the meal.
+
+# ── BATCH 3: HOME & DAILY LIFE (58) ─────────────────────────────
+parede | wall | noun | theme=casa; gender=f; plural=paredes | A parede é branca. | The wall is white.
+chão | floor | noun | theme=casa; gender=m; note=also "ground" | O chão está sujo. | The floor is dirty.
+teto | ceiling | noun | theme=casa; gender=m | O teto é alto. | The ceiling is high.
+sala | living room / hall | noun | theme=casa; gender=f; plural=salas | A sala está limpa. | The living room is clean.
+casa-de-banho | bathroom | noun | theme=casa; gender=f; plural=casas-de-banho | A casa-de-banho está ocupada. | The bathroom is busy.
+sofá | sofa | noun | theme=casa; gender=m; plural=sofás | O gato dorme no sofá. | The cat sleeps on the sofa.
+estante | bookshelf | noun | theme=casa; gender=f; plural=estantes | Os livros estão na estante. | The books are on the shelf.
+televisão | television / TV | noun | theme=casa; gender=f; plural=televisões | Vejo televisão de noite. | I watch television at night.
+luz | light | noun | theme=casa; gender=f; plural=luzes | A luz não funciona. | The light doesn't work.
+chuveiro | shower | noun | theme=casa; gender=m; plural=chuveiros | O chuveiro está frio. | The shower is cold.
+espelho | mirror | noun | theme=casa; gender=m; plural=espelhos | Olho-me no espelho. | I look at myself in the mirror.
+aquecedor | heater | noun | theme=casa; gender=m; plural=aquecedores | O aquecedor está ligado. | The heater is on.
+ar-condicionado | air conditioning | noun | theme=casa; gender=m; note=with o: o ar-condicionado | O ar-condicionado está frio. | The air conditioning is cold.
+máquina | machine | noun | theme=casa; gender=f; plural=máquinas | A máquina está avariada. | The machine is broken.
+máquina de lavar | washing machine | noun | theme=casa; gender=f | A máquina de lavar faz barulho. | The washing machine is noisy.
+roupa | clothes | noun | theme=casa; gender=f; plural=roupas; note=clothes in general | A roupa está na máquina. | The clothes are in the machine.
+vassoura | broom | noun | theme=casa; gender=f; plural=vassouras | Vou passar a vassoura. | I am going to sweep.
+pó | dust | noun | theme=casa; gender=m; plural=pós | Há muito pó nesta sala. | There is a lot of dust in this room.
+lixo | rubbish / trash | noun | theme=casa; gender=m; note=BR lixo, PT lixo too | Vou levar o lixo fora. | I am going to take the rubbish out.
+jardim | garden | noun | theme=casa; gender=m; plural=jardins | As crianças brincam no jardim. | The children play in the garden.
+flores | flowers | noun | theme=casa; gender=f; plural=used only | As flores são bonitas. | The flowers are nice.
+garagem | garage | noun | theme=casa; gender=f; plural=garagens | O carro está na garagem. | The car is in the garage.
+limpar | to clean | verb | theme=casa; conj=limpei, limpaste, limpou | Vou limpar a casa. | I am going to clean the house.
+varrer | to sweep | verb | theme=casa; conj=varrí, varraste, varrreu | Ele varre o chão. | He sweeps the floor.
+lavar | to wash | verb | theme=casa; conj=lavei, lavaste, lavou | Lavo a loiça todos os dias. | I wash the dishes every day.
+guardar | to put away | verb | theme=casa; conj=guardei, guardaste, guardou | Guarda os livros na estante. | Put the books on the shelf.
+arrumar | to tidy | verb | theme=casa; conj=arrumei, arrumaste, arrumou | Arrumaste o quarto? | Did you tidy the bedroom?
+acender | to switch on | verb | theme=casa; conj=acendi, acendeste, acendeu | Acende a luz, por favor. | Switch on the light, please.
+apagar | to switch off | verb | theme=casa; conj=apaguei, apagaste, apagou | Apaga a televisão. | Switch off the television.
+trancar | to lock | verb | theme=casa; conj=tranquei, trancaste, trancou | Trancou a porta de trás? | Did he lock the back door?
+usar | to use | verb | theme=casa; conj=usei, usaste, usou | Uso o computador todos os dias. | I use the computer every day.
+limpo | clean | adj | theme=casa; conj=limpa | A casa está limpa. | The house is clean.
+sujo | dirty | adj | theme=casa; conj=suja | Os pratos estão sujos. | The plates are dirty.
+arrumado | tidy | adj | theme=casa; conj=arrumada | O teu quarto está arrumado. | Your bedroom is tidy.
+confortável | comfortable | adj | theme=casa | A cadeira é confortável. | The chair is comfortable.
+claro | bright / light | adj | theme=casa; conj=clara | O quarto é muito claro. | The room is very bright.
+escuro | dark | adj | theme=casa; conj=escura; note=also noun "darkness" | Está escuro aqui dentro. | It is dark in here.
+Podes limpar a mesa? | Can you clear the table? | phrase | theme=casa | Podes limpar a mesa, por favor? | Can you clear the table, please?
+A chave está na mesa. | The key is on the table. | phrase | theme=casa | A chave está na mesa. | The key is on the table.
+Estou a limpar a casa. | I am cleaning the house. | phrase | theme=casa | Estou a limpar a casa. | I am cleaning the house.
+A casa está uma confusão. | The house is a mess. | phrase | theme=casa | A casa está uma confusão. | The house is a mess.
+
+# ── BATCH 4: TRAVEL & PLACES (62) ──────────────────────────────
+viagem | trip / journey | noun | theme=viagem; gender=f; plural=viagens | A viagem foi longa. | The trip was long.
+viajante | traveller | noun | theme=viagem; gender=m; plural=viajantes | O viajante estava cansado. | The traveller was tired.
+turista | tourist | noun | theme=viagem; gender=m; plural=turistas | Há muitos turistas no Porto. | There are many tourists in Porto.
+hotel | hotel | noun | theme=viagem; gender=m; plural=hotéis | Fico hospedado num hotel. | I am staying at a hotel.
+hospedaria | guesthouse | noun | theme=viagem; gender=f; plural=hospedarias | A hospedaria é barata. | The guesthouse is cheap.
+aeroporto | airport | noun | theme=viagem; gender=m; plural=aeroportos | O aeroporto fica a 20 km. | The airport is 20 km away.
+avião | aeroplane | noun | theme=viagem; gender=m; plural=aviões; note=BR avião, PT aviao too | O avião parte às seis. | The plane leaves at six.
+voo | flight | noun | theme=viagem; gender=m; plural=voos | Perdi o meu voo. | I missed my flight.
+bilhete | ticket | noun | theme=viagem; gender=m; plural=bilhetes | Comprei um bilhete de ida. | I bought a one-way ticket.
+ida e volta | return ticket | phrase | theme=viagem | Quero um bilhete de ida e volta. | I want a return ticket.
+passaporte | passport | noun | theme=viagem; gender=m; plural=passaportes | Mostre o seu passaporte. | Show your passport.
+bagagem | luggage | noun | theme=viagem; gender=f; note=bagagem, sing. only | A minha bagagem está perdida. | My luggage is lost.
+malas | suitcases | noun | theme=viagem; gender=f; plural=used only | As malas estão no carro. | The suitcases are in the car.
+embarque | boarding | noun | theme=viagem; gender=m | O embarque é às duas. | Boarding is at two.
+atraso | delay | noun | theme=viagem; gender=m; plural=atrasos | Houve um atraso de uma hora. | There was a one-hour delay.
+cancelado | cancelled | adj | theme=viagem | O voo foi cancelado. | The flight was cancelled.
+estrangeiro | foreigner | noun | theme=viagem; gender=m; plural=estrangeiros; f=estrangeira | O estrangeiro fala português. | The foreigner speaks Portuguese.
+mar | sea | noun | theme=viagem; gender=m; note=invariable | O mar está calmo. | The sea is calm.
+montanha | mountain | noun | theme=viagem; gender=f; plural=montanhas | Subimos a montanha de manhã. | We climbed the mountain in the morning.
+aldeia | village | noun | theme=viagem; gender=f; plural=aldeias | A aldeia é muito calma. | The village is very quiet.
+avenida | avenue | noun | theme=viagem; gender=f; plural=avenidas | A avenida está cheia. | The avenue is full.
+praça | square | noun | theme=viagem; gender=f; plural=praças | Encontramo-nos na praça. | We met at the square.
+ponte | bridge | noun | theme=viagem; gender=f; plural=pontes | Atravessámos a ponte a pé. | We crossed the bridge on foot.
+mapa | map | noun | theme=viagem; gender=m; plural=mapas | Preciso de um mapa da cidade. | I need a map of the city.
+endereço | address | noun | theme=viagem; gender=m; plural=endereços | Qual é o teu endereço? | What is your address?
+museu | museum | noun | theme=viagem; gender=m; plural=museus | O museu fecha às seis. | The museum closes at six.
+monumento | monument | noun | theme=viagem; gender=m; plural=monumentos | O monumento é do século XV. | The monument is from the 15th century.
+comboio | train | noun | theme=viagem; gender=m; plural=comboios; note=BR trem | O comboio parte às oito. | The train leaves at eight.
+autocarro | bus | noun | theme=viagem; gender=m; plural=autocarros; note=BR ônibus | O autocarro não vem. | The bus is not coming.
+táxi | taxi | noun | theme=viagem; gender=m; plural=táxis | Chamamos um táxi. | We are calling a taxi.
+metro | metro / underground | noun | theme=viagem; gender=m; plural=metros | O metro é mais rápido. | The metro is faster.
+entrada | entrance / entry | noun | theme=viagem; gender=f; plural=entradas | A entrada é gratuita. | Entry is free.
+saída | exit | noun | theme=viagem; gender=f; plural=saídas | A saída é por aqui. | The exit is this way.
+fronteira | border | noun | theme=viagem; gender=f; plural=fronteiras | Passámos a fronteira. | We crossed the border.
+seguro | insurance | noun | theme=viagem; gender=m; plural=seguros | O seguro é obrigatório. | Insurance is compulsory.
+moeda | currency | noun | theme=viagem; gender=f; plural=moedas | A moeda aqui é o euro. | The currency here is the euro.
+viajar | to travel | verb | theme=viagem; conj=viajei, viajaste, viajou | Gosto de viajar. | I like travelling.
+reservar | to book / reserve | verb | theme=viagem; conj=reservei, reservaste, reservou | Reservei um quarto. | I booked a room.
+partir | to leave / depart | verb | theme=viagem; conj=parti, partiste, partiu | A que horas partimos? | What time do we leave?
+chegar | to arrive | verb | theme=viagem; conj=cheguei, chegaste, chegou | Chegamos às dez. | We arrived at ten.
+apanhar | to catch / take | verb | theme=viagem; conj=apanhei, apanhaste, apanhou | Apanhei o último autocarro. | I caught the last bus.
+perder | to lose | verb | theme=viagem; conj=perdi, perdeste, perdeu | Perdi-me na cidade. | I got lost in the city.
+encontrar | to find / meet | verb | theme=viagem; conj=encontrei, encontraste, encontrou | Encontrei o meu amigo. | I met my friend.
+seguir | to follow | verb | theme=viagem; conj=segui, seguiste, seguiu | Sigue sempre em frente. | Always go straight ahead.
+virar | to turn | verb | theme=viagem; conj=virei, viraste, virou | Vire à direita no segundo cruzamento. | Turn right at the second junction.
+atravessar | to cross | verb | theme=viagem; conj=atravessei, atravessaste, atravessou | Atravessa a rua com cuidado. | Cross the road carefully.
+alugar | to rent | verb | theme=viagem; conj=aluguei, alugaste, alugou | Alugámos um carro. | We rented a car.
+perto | near / close | adj | theme=viagem; conj=perto | O hotel é perto. | The hotel is close.
+longe | far | adj | theme=viagem | A praia está longe. | The beach is far.
+onde fica? | where is it? | phrase | theme=viagem | Onde fica a estação? | Where is the station?
+quanto custa? | how much does it cost? | phrase | theme=viagem | Quanto custa o bilhete? | How much does the ticket cost?
+a que horas parte? | what time does it leave? | phrase | theme=viagem | A que horas parte o comboio? | What time does the train leave?
+estou perdido | I am lost | phrase | theme=viagem | Estou perdido, pode ajudar? | I am lost, can you help?
+um bilhete para Lisboa, por favor | one ticket to Lisbon, please | phrase | theme=viagem | Um bilhete para Lisboa, por favor. | One ticket to Lisbon, please.
+posso pagar com cartão? | can I pay by card? | phrase | theme=viagem | Posso pagar com cartão? | Can I pay by card?
+tem lugar aqui? | is this seat free? | phrase | theme=viagem | Tem lugar aqui? | Is this seat free?
+
+# ── BATCH 5: WORK, MONEY & TECH (60) ───────────────────────────
+emprego | job / employment | noun | theme=trabalho; gender=m; plural=empregos | Tenho um novo emprego. | I have a new job.
+chefe | boss | noun | theme=trabalho; gender=m; plural=chefes; f=chefa | O chefe está em reunião. | The boss is in a meeting.
+escritório | office | noun | theme=trabalho; gender=m; plural=escritórios | O escritório fica no centro. | The office is downtown.
+reunião | meeting | noun | theme=trabalho; gender=f; plural=reuniões | A reunião é às três. | The meeting is at three.
+horário | schedule / opening hours | noun | theme=trabalho; gender=m; plural=horários | Qual é o teu horário? | What is your schedule?
+férias | holiday / vacation | noun | theme=trabalho; gender=f; plural=only; note=sem férias = without holiday | Vou de férias em agosto. | I am going on holiday in August.
+salário | salary | noun | theme=trabalho; gender=m; plural=salários | O salário é pago ao fim do mês. | The salary is paid at the end of the month.
+projeto | project | noun | theme=trabalho; gender=m; plural=projetos | O projeto termina em junho. | The project ends in June.
+prazo | deadline | noun | theme=trabalho; gender=m; plural=prazos | O prazo é sexta-feira. | The deadline is Friday.
+tarefa | task | noun | theme=trabalho; gender=f; plural=tarefas | Tenho muitas tarefas hoje. | I have many tasks today.
+troco | change (coins) | noun | theme=dinheiro; gender=m; plural=trocos | Não tenho troco. | I have no change.
+preço | price | noun | theme=dinheiro; gender=m; plural=preços | O preço é demasiado alto. | The price is too high.
+custo | cost | noun | theme=dinheiro; gender=m; plural=custos | O custo de vida sobe. | The cost of living is rising.
+desconto | discount | noun | theme=dinheiro; gender=m; plural=descontos | Got 10% desconto. | I got a 10% discount.
+grátis | free (of charge) | adj | theme=dinheiro | O café é grátis. | The coffee is free.
+pagar | to pay | verb | theme=dinheiro; conj=paguei, pagaste, pagou, pagámos | Vou pagar com cartão. | I am going to pay by card.
+gastar | to spend | verb | theme=dinheiro; conj=gastei, gastaste, gastou | Gasto muito em comida. | I spend a lot on food.
+poupar | to save (money) | verb | theme=dinheiro; conj=poupei, poupaste, poupou | Poupo um pouco por mês. | I save a little each month.
+computador | computer | noun | theme=tecnologia; gender=m; plural=computadores | O computador está lento. | The computer is slow.
+portátil | laptop | noun | theme=tecnologia; gender=m; plural=portáteis; note=BR notebook | O portátil está na mochila. | The laptop is in the bag.
+telemóvel | mobile phone | noun | theme=tecnologia; gender=m; plural=telemóveis; note=BR celular | A bateria do telemóvel morreu. | The phone battery died.
+ecrã | screen | noun | theme=tecnologia; gender=m; plural=ecrãs | O ecrã está partido. | The screen is cracked.
+teclado | keyboard | noun | theme=tecnologia; gender=m; plural=teclados | O teclado não funciona. | The keyboard doesn't work.
+impressora | printer | noun | theme=tecnologia; gender=f; plural=impressoras | A impressora não tem papel. | The printer has no paper.
+internet | internet | noun | theme=tecnologia; gender=f; note=BR internet too | A internet está lenta. | The internet is slow.
+e-mail | email | noun | theme=tecnologia; gender=m; plural=e-mails | Recebi um e-mail. | I received an email.
+palavra-passe | password | noun | theme=tecnologia; gender=f; plural=palavras-passe | Esqueci-me da palavra-passe. | I forgot my password.
+aplicação | app | noun | theme=tecnologia; gender=f; plural=aplicações | Desinstalei a aplicação. | I uninstalled the app.
+ficheiro | file | noun | theme=tecnologia; gender=m; plural=ficheiros; note=BR arquivo | O ficheiro não abre. | The file will not open.
+programa | program | noun | theme=tecnologia; gender=m; plural=programas | Este programa é grátis. | This program is free.
+carregar | to charge (battery) / to upload | verb | theme=tecnologia; conj=carreguei, carregaste, carregou | O telemóvel está a carregar. | The phone is charging.
+enviar | to send | verb | theme=tecnologia; conj=enviei, enviaste, enviou | Envia o ficheiro por e-mail. | Send the file by email.
+começar | to begin / start | verb | theme=trabalho; conj=comecei, começaste, começou | Começo às nove. | I start at nine.
+terminar | to finish / end | verb | theme=trabalho; conj=terminei, terminaste, terminou | A reunião já terminou. | The meeting has already finished.
+resolver | to solve / resolve | verb | theme=trabalho; conj=resolvi, resolveste, resolveu | Resolvi o problema. | I solved the problem.
+vou trabalhar | I am going to work | phrase | theme=trabalho | Vou trabalhar até às seis. | I am going to work until six.
+tenho uma reunião | I have a meeting | phrase | theme=trabalho | Tenho uma reunião às três. | I have a meeting at three.
+quando começas? | when do you start? | phrase | theme=trabalho | Quando começas amanhã? | When do you start tomorrow?
+está a carregar? | is it charging? | phrase | theme=tecnologia | O telemóvel está a carregar? | Is the phone charging?
+não tenho internet | I have no internet | phrase | theme=tecnologia | Não tenho internet em casa. | I have no internet at home.
+qual é a palavra-passe? | what is the password? | phrase | theme=tecnologia | Qual é a palavra-passe? | What is the password?

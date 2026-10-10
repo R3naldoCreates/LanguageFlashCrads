@@ -642,61 +642,162 @@
     });
   }
 
-  /* ── levels: words are ordered, so a "level" is just a block of
-        100 words in file order. Level N = words N*100+1 … N*100+100. */
+  /* ── practice selection (theme + word range + how many) ──────
+        Remembered per language in localStorage. Choosing a chip
+        only changes the setting — nothing starts by itself.  */
 
-  function levelStats(l) {
-    var code = l.meta.code;
-    var m = srsLoad(code);
-    var blocks = Math.ceil(l.entries.length / 100);
+  var THEME_LABELS = {
+    basico: 'Basics', familia: 'Family & people', comida: 'Food & drink',
+    casa: 'Home & daily life', lugares: 'Places & city', viagem: 'Travel',
+    trabalho: 'Work & money', tecnologia: 'Tech', sentimento: 'Feelings',
+    social: 'Social phrases', corpo: 'Body & health', vestuario: 'Clothes & shopping',
+    natureza: 'Nature & weather', escola: 'School & study', animal: 'Animals',
+    acoes: 'Everyday actions', descricoes: 'Descriptions', tempo: 'Time',
+    geral: 'General', divertimento: 'Fun & hobbies'
+  };
+
+  var COUNT_CHOICES = [10, 20, 30, 50, 100, 0]; /* 0 = all */
+
+  function themeLabel(t) { return THEME_LABELS[t] || t; }
+
+  function getPick(code) {
+    var p;
+    try { p = JSON.parse(localStorage.getItem(PREFIX + 'pick:' + code) || '{}'); } catch (e) { p = {}; }
+    if (!p || typeof p !== 'object') p = {};
+    return {
+      range: String(p.range != null ? p.range : 'all'),
+      theme: p.theme || 'all',
+      count: typeof p.count === 'number' ? p.count : 30
+    };
+  }
+
+  function setPick(code, key, val) {
+    var p = getPick(code);
+    p[key] = val;
+    try { localStorage.setItem(PREFIX + 'pick:' + code, JSON.stringify(p)); } catch (e) {}
+  }
+
+  function themeList(l) {
+    var counts = {};
+    l.entries.forEach(function (e) {
+      var t = featVal(e, 'theme');
+      if (t) counts[t] = (counts[t] || 0) + 1;
+    });
+    return Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+  }
+
+  function rangeList(l) {
     var out = [];
-    for (var b = 0; b < blocks; b++) {
-      var start = b * 100, end = Math.min(start + 100, l.entries.length);
-      var known = 0, learning = 0;
-      for (var i = start; i < end; i++) {
-        var rec = m[l.entries[i].id];
-        if (!rec || rec.n === 0) continue;
-        if (rec.s >= 3) known++; else learning++;
-      }
-      out.push({
-        b: b, from: start + 1, to: end, size: end - start,
-        known: known, learning: learning,
-        done: known >= Math.ceil((end - start) * 0.9)
-      });
+    for (var b = 0; b * 100 < l.entries.length; b++) {
+      out.push({ id: String(b), b: b, from: b * 100 + 1, to: Math.min(b * 100 + 100, l.entries.length) });
     }
     return out;
   }
 
-  function levelsHTML(l) {
-    var blocks = levelStats(l);
-    var next = null;
-    for (var i = 0; i < blocks.length; i++) { if (!blocks[i].done) { next = blocks[i]; break; } }
-    var h = '<div class="section-label">Levels — learn 100 words at a time</div>';
-    if (next) {
-      h += '<button class="btn primary block level-next" data-act="start-level" data-b="' + next.b + '" style="margin-bottom:8px">' +
-        '▶ Continue: words ' + next.from + '–' + next.to + ' (★' + next.known + '/' + next.size + ')</button>';
-    } else {
-      h += '<div class="banner" style="margin-bottom:8px">🎉 Every level complete — amazing!</div>';
-    }
-    h += '<div class="chiprow">';
-    blocks.forEach(function (blk) {
-      h += '<button class="chip levelchip' + (blk.done ? ' done' : '') + (next && next.b === blk.b ? ' active' : '') + '" data-act="start-level" data-b="' + blk.b + '">' +
-        (blk.done ? '✅ ' : '') + blk.from + '–' + blk.to +
-        ' <span class="count">★' + blk.known + '</span></button>';
-    });
-    h += '</div>';
-    return h;
+  function rangeLabel(l, id) {
+    var r = null;
+    rangeList(l).forEach(function (x) { if (x.id === id) r = x; });
+    return r ? (r.from + '–' + r.to) : '';
   }
 
-  function startLevel(b) {
+  /* entries matching a theme + range selection */
+  function poolFor(l, theme, range) {
+    var from = range === 'all' ? 0 : parseInt(range, 10) * 100;
+    var to = from + 100;
+    var pool = [];
+    l.entries.forEach(function (e, i) {
+      if (from && (i < from || i >= to)) return;
+      if (theme !== 'all' && featVal(e, 'theme') !== theme) return;
+      pool.push(e);
+    });
+    return pool;
+  }
+
+  function pickPool(l) { var p = getPick(l.meta.code); return poolFor(l, p.theme, p.range); }
+
+  function pickSummary(l) {
+    var p = getPick(l.meta.code);
+    var bits = [];
+    if (p.theme !== 'all') bits.push(themeLabel(p.theme));
+    else bits.push('All themes');
+    if (p.range !== 'all') bits.push('words ' + rangeLabel(l, p.range));
+    else bits.push('all words');
+    bits.push(p.count > 0 ? p.count + ' cards' : 'every card');
+    return bits.join(' · ');
+  }
+
+  function startPick() {
     var l = L();
-    var deck = l.entries.slice();
-    var start = b * 100, end = Math.min(start + 100, deck.length);
-    deck = deck.slice(start, end);
-    if (!deck.length) { showToast('No words in that level'); return; }
-    if (state.shuffle) deck = shuffleArr(deck);
-    state.basic = { deck: deck, i: 0, flipped: false, title: 'Level ' + (start + 1) + '–' + end };
+    var pool = pickPool(l);
+    if (!pool.length) { showToast('Nothing matches — try another theme or range'); return; }
+    var p = getPick(l.meta.code);
+    var deck = state.shuffle ? shuffleArr(pool) : pool.slice();
+    if (p.count > 0) deck = deck.slice(0, p.count);
+    if (!deck.length) { showToast('Nothing matches — try a bigger range'); return; }
+    state.basic = { deck: deck, i: 0, flipped: false, title: pickSummary(l) };
     nav('basic');
+  }
+
+  /* level blocks + per-block star counts */
+  function levelStats(l) {
+    var m = srsLoad(l.meta.code);
+    var out = [];
+    rangeList(l).forEach(function (r) {
+      var known = 0;
+      for (var i = r.from - 1; i < r.to; i++) {
+        var rec = m[l.entries[i].id];
+        if (rec && rec.n > 0 && rec.s >= 3) known++;
+      }
+      out.push({ id: r.id, from: r.from, to: r.to, size: r.to - r.from + 1, known: known,
+        done: known >= Math.ceil((r.to - r.from + 1) * 0.9) });
+    });
+    return out;
+  }
+
+  function setupHTML(l) {
+    var p = getPick(l.meta.code);
+    var themes = themeList(l);
+    var ranges = rangeList(l);
+    var pool = pickPool(l);
+    var blocks = levelStats(l);
+    var next = null;
+    blocks.forEach(function (b) { if (!next && !b.done) next = b; });
+
+    var h = '<div class="section-label">1 · Choose a topic</div><div class="chiprow">';
+    h += '<button class="chip' + (p.theme === 'all' ? ' active' : '') + '" data-act="pick" data-key="theme" data-val="all">All topics <span class="count">' + l.entries.length + '</span></button>';
+    themes.forEach(function (t) {
+      var n = poolFor(l, t, 'all').length;
+      h += '<button class="chip' + (p.theme === t ? ' active' : '') + '" data-act="pick" data-key="theme" data-val="' + esc(t) + '">' +
+        esc(themeLabel(t)) + ' <span class="count">' + n + '</span></button>';
+    });
+    h += '</div>';
+
+    h += '<div class="section-label">2 · Choose the words</div><div class="chiprow">';
+    h += '<button class="chip' + (p.range === 'all' ? ' active' : '') + '" data-act="pick" data-key="range" data-val="all">Random from all <span class="count">' + l.entries.length + '</span></button>';
+    blocks.forEach(function (b) {
+      var n = poolFor(l, p.theme, b.id).length;
+      h += '<button class="chip' + (p.range === b.id ? ' active' : '') + (n === 0 ? ' empty' : '') + '" data-act="pick" data-key="range" data-val="' + b.id + '">' +
+        (b.done ? '✅' : '') + b.from + '–' + b.to +
+        ' <span class="count">' + (n === 0 ? '0' : b.known + '★/' + n) + '</span></button>';
+    });
+    h += '</div>';
+
+    h += '<div class="section-label">3 · How many cards</div><div class="chiprow">';
+    COUNT_CHOICES.forEach(function (n) {
+      h += '<button class="chip' + (p.count === n ? ' active' : '') + '" data-act="pick" data-key="count" data-val="' + n + '">' +
+        (n === 0 ? 'All' : n) + '</button>';
+    });
+    h += '</div>';
+
+    h += '<div class="picksum">' +
+      (next && (p.range === 'all' || p.range === next.id)
+        ? '<div class="picksug">Next unfinished block: <b>words ' + next.from + '–' + next.to + '</b> (★' + next.known + '/' + next.size + ') ' +
+          '<button class="mini-link" data-act="use-next" data-b="' + next.id + '">select it</button></div>'
+        : '') +
+      '<div class="picksum-line">Ready: <b>' + esc(pickSummary(l)) + '</b> · ' + pool.length + ' card(s) match</div>' +
+      '</div>';
+    h += '<button class="btn primary block" data-act="start-pick" style="min-height:56px">▶ Start studying</button>';
+    return h;
   }
 
   /* ───────────────────────── rendering ───────────────────── */
@@ -866,7 +967,7 @@
 
     var st = streakInfo();
     var goal = getGoal();
-    h += levelsHTML(l);
+    h += setupHTML(l);
     h += '<div class="goalbar">' +
       (st.current > 0 ? '<span class="streak">🔥 ' + st.current + '</span>' : '') +
       '<span class="today">Today: ' + todayStudied() + ' / ' + goal + (st.doneToday ? ' ✓' : '') + '</span>' +
@@ -887,22 +988,21 @@
       }
     }
 
-    var pool = entriesFor(l).length;
+    var pool = pickPool(l);
     var due = dueEntries(l);
     var dueCount = due.due.length;
     h += '<div class="mode-grid">';
     if (dueCount > 0) {
       h += '<button class="mode-btn due" data-act="start-due"><span class="ico">⏰</span><span><span class="t">Due today (' + dueCount + ')</span><div class="d">Smart review — hardest first, then new words</div></span></button>';
     }
-    h += '<button class="mode-btn" data-act="start-basic"><span class="ico">🃏</span><span><span class="t">Flash cards</span><div class="d">See a word, tap to reveal the meaning</div></span></button>' +
-      '<button class="mode-btn" data-act="go-testsetup"><span class="ico">📝</span><span><span class="t">Test me</span><div class="d">10 / 20 / 30 cards · score + wrong words go to To Learn</div></span></button>' +
-      '<button class="mode-btn" data-act="start-tol"><span class="ico">⭐</span><span><span class="t">To Learn (' + tl + ')</span><div class="d">Drill only your weak cards</div></span></button>' +
+    h += '<button class="mode-btn" data-act="start-tol"><span class="ico">⭐</span><span><span class="t">To Learn (' + tl + ')</span><div class="d">Drill only your weak cards</div></span></button>' +
+      '<button class="mode-btn" data-act="go-testsetup"><span class="ico">📝</span><span><span class="t">Test me</span><div class="d">10 / 20 / 30 cards from your selection · wrong words go to To Learn</div></span></button>' +
       '<button class="mode-btn" data-act="start-listen"><span class="ico">🎧</span><span><span class="t">Listen</span><div class="d">Hear the word, type what it means</div></span></button>' +
       '</div>';
-    h += '<p class="home-foot">Current filter: ' +
-      (state.posFilter === 'all' ? 'all word types' : esc(posLabel(l, state.posFilter))) +
-      ' · ' + pool + ' card(s) in pool' +
-      (isRev(l) ? ' · ↺ reversed (EN → ' + esc(l.meta.name) + ')' : '') +
+    h += '<p class="home-foot">Everything above uses your selection: ' +
+      esc(pickSummary(l)) +
+      (state.posFilter === 'all' ? '' : ' · ' + esc(posLabel(l, state.posFilter)) + ' only') +
+      ' · ' + pool.length + ' card(s) available' +
       '</p>';
     return h;
   }
@@ -1203,9 +1303,12 @@
 
   function startTol() {
     var l = L();
-    var deck = tolearnEntries(l);
-    if (state.shuffle) deck = shuffleArr(deck);
-    state.tol = { deck: deck, i: 0, flipped: false };
+    var p = getPick(l.meta.code);
+    var pool = tolearnEntries(l);
+    if (!pool.length) pool = pickPool(l);
+    if (state.shuffle) pool = shuffleArr(pool);
+    if (p.count > 0) pool = pool.slice(0, p.count);
+    state.tol = { deck: pool, i: 0, flipped: false, title: '⭐ ' + pickSummary(l) };
     nav('tol');
   }
 
@@ -1224,7 +1327,7 @@
   function startTest() {
     var l = L();
     var cfg = state.testCfg || { len: 10, src: 'all', typing: false };
-    var pool = cfg.src === 'tl' ? tolearnEntries(l) : entriesFor(l);
+    var pool = cfg.src === 'tl' ? tolearnEntries(l) : pickPool(l);
     if (state.shuffle) pool = shuffleArr(pool);
     var deck = pool.slice(0, cfg.len);
     state.test = {
@@ -1242,14 +1345,16 @@
       showToast('No ' + l.meta.name + ' voice on this device — Listen mode needs audio');
       return;
     }
-    var pool = entriesFor(l);
+    var p = getPick(l.meta.code);
+    var pool = pickPool(l);
     if (state.shuffle) pool = shuffleArr(pool);
+    pool = pool.slice(0, p.count > 0 ? Math.min(p.count, 15) : 15);
     state.test = {
-      deck: pool.slice(0, 15), i: 0, flipped: true, right: [], wrong: [],
+      deck: pool, i: 0, flipped: true, right: [], wrong: [],
       result: null, style: 'listen', fb: null
     };
     nav('testRun');
-    trySpeak(pool[0].front, lang, l.meta.code, l.meta.name, true);
+    if (pool.length) trySpeak(pool[0].front, lang, l.meta.code, l.meta.name, true);
   }
 
   function answer(ok) {
@@ -1413,7 +1518,24 @@
         render(); return;
       }
       case 'start-basic': startBasic(); speakCurrent(); return;
-      case 'start-level': startLevel(parseInt(el.getAttribute('data-b'), 10)); speakCurrent(); return;
+      case 'start-pick': startPick(); speakCurrent(); return;
+      case 'pick': {
+        var pl = L();
+        if (!pl) return;
+        var key = el.getAttribute('data-key');
+        var val = el.getAttribute('data-val');
+        if (key === 'count') val = parseInt(val, 10);
+        setPick(pl.meta.code, key, val);
+        render();
+        return;
+      }
+      case 'use-next': {
+        var pnl = L();
+        setPick(pnl.meta.code, 'range', el.getAttribute('data-b'));
+        showToast('Selected — now press Start');
+        render();
+        return;
+      }
       case 'start-tol': startTol(); speakCurrent(); return;
       case 'start-due': startDue(); speakCurrent(); return;
       case 'start-listen': startListen(); return;

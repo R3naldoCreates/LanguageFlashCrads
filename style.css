@@ -566,6 +566,24 @@ html, body {
 .level-next { font-weight: 700; }
 .chip.levelchip { font-size: 13px; }
 .chip.levelchip.done { border-color: var(--good); color: var(--good); }
+
+.picksum {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+}
+.picksum-line { color: var(--text-dim); }
+.picksum-line b { color: var(--text); }
+.picksug {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.picksug b { color: var(--accent); }
+.chip.empty { opacity: .38; }
 .mastery-bar {
   display: flex;
   height: 10px;

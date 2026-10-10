@@ -1790,7 +1790,12 @@
     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator &&
         (location.protocol === 'https:' ||
          location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-      navigator.serviceWorker.register('sw.js').catch(function () {});
+      navigator.serviceWorker.register('sw.js').then(function () {
+        /* ask the browser to fetch a newer service worker right away */
+        if (navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then(function (reg) { if (reg.update) reg.update(); });
+        }
+      }).catch(function () {});
     }
 
     loadAll().then(render);

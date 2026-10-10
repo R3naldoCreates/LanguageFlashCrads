@@ -642,6 +642,63 @@
     });
   }
 
+  /* ── levels: words are ordered, so a "level" is just a block of
+        100 words in file order. Level N = words N*100+1 … N*100+100. */
+
+  function levelStats(l) {
+    var code = l.meta.code;
+    var m = srsLoad(code);
+    var blocks = Math.ceil(l.entries.length / 100);
+    var out = [];
+    for (var b = 0; b < blocks; b++) {
+      var start = b * 100, end = Math.min(start + 100, l.entries.length);
+      var known = 0, learning = 0;
+      for (var i = start; i < end; i++) {
+        var rec = m[l.entries[i].id];
+        if (!rec || rec.n === 0) continue;
+        if (rec.s >= 3) known++; else learning++;
+      }
+      out.push({
+        b: b, from: start + 1, to: end, size: end - start,
+        known: known, learning: learning,
+        done: known >= Math.ceil((end - start) * 0.9)
+      });
+    }
+    return out;
+  }
+
+  function levelsHTML(l) {
+    var blocks = levelStats(l);
+    var next = null;
+    for (var i = 0; i < blocks.length; i++) { if (!blocks[i].done) { next = blocks[i]; break; } }
+    var h = '<div class="section-label">Levels — learn 100 words at a time</div>';
+    if (next) {
+      h += '<button class="btn primary block level-next" data-act="start-level" data-b="' + next.b + '" style="margin-bottom:8px">' +
+        '▶ Continue: words ' + next.from + '–' + next.to + ' (★' + next.known + '/' + next.size + ')</button>';
+    } else {
+      h += '<div class="banner" style="margin-bottom:8px">🎉 Every level complete — amazing!</div>';
+    }
+    h += '<div class="chiprow">';
+    blocks.forEach(function (blk) {
+      h += '<button class="chip levelchip' + (blk.done ? ' done' : '') + (next && next.b === blk.b ? ' active' : '') + '" data-act="start-level" data-b="' + blk.b + '">' +
+        (blk.done ? '✅ ' : '') + blk.from + '–' + blk.to +
+        ' <span class="count">★' + blk.known + '</span></button>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  function startLevel(b) {
+    var l = L();
+    var deck = l.entries.slice();
+    var start = b * 100, end = Math.min(start + 100, deck.length);
+    deck = deck.slice(start, end);
+    if (!deck.length) { showToast('No words in that level'); return; }
+    if (state.shuffle) deck = shuffleArr(deck);
+    state.basic = { deck: deck, i: 0, flipped: false, title: 'Level ' + (start + 1) + '–' + end };
+    nav('basic');
+  }
+
   /* ───────────────────────── rendering ───────────────────── */
 
   var app = null;
@@ -809,6 +866,7 @@
 
     var st = streakInfo();
     var goal = getGoal();
+    h += levelsHTML(l);
     h += '<div class="goalbar">' +
       (st.current > 0 ? '<span class="streak">🔥 ' + st.current + '</span>' : '') +
       '<span class="today">Today: ' + todayStudied() + ' / ' + goal + (st.doneToday ? ' ✓' : '') + '</span>' +
@@ -938,7 +996,7 @@
     }
 
     var e = sess.deck[sess.i];
-    var title = mode === 'tol' ? '⭐ To Learn' : '🃏 Flash cards';
+    var title = sess.title || (mode === 'tol' ? '⭐ To Learn' : '🃏 Flash cards');
     var h = topbarHTML(title, (sess.i + 1) + ' / ' + sess.deck.length);
     h += '<div class="counter" id="counter-line">' + esc(promptText(l, e)) + ' — ' + (sess.flipped ? esc(answerText(l, e)) : '?') + '</div>';
     h += '<div class="card-scene"><div class="card' + (sess.flipped ? ' flipped' : '') + '" data-act="flip">' +
@@ -1355,6 +1413,7 @@
         render(); return;
       }
       case 'start-basic': startBasic(); speakCurrent(); return;
+      case 'start-level': startLevel(parseInt(el.getAttribute('data-b'), 10)); speakCurrent(); return;
       case 'start-tol': startTol(); speakCurrent(); return;
       case 'start-due': startDue(); speakCurrent(); return;
       case 'start-listen': startListen(); return;

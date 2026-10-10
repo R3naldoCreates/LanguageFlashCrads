@@ -563,6 +563,9 @@ html, body {
 .mastery.m-known { color: var(--star); }
 
 .mastery-row { margin: 10px 0 6px; }
+.level-next { font-weight: 700; }
+.chip.levelchip { font-size: 13px; }
+.chip.levelchip.done { border-color: var(--good); color: var(--good); }
 .mastery-bar {
   display: flex;
   height: 10px;

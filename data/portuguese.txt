@@ -245,3 +245,122 @@ nunca | never | adv | | Nunca estou em casa. | I'm never at home.
 também | also / too | adv | note=neither = também não | Eu também falo inglês. | I also speak English.
 muito | a lot / very | adv | note=invariable, adv form muitas vezes | Trabalho muito. | I work a lot.
 pouco | little / few | adv | note=invariable | Falo pouco no início. | I speak little at first.
+
+# ═══════════════════════════════════════════════════════════════
+#  EXPANDED DECK — themed batches of common, useful vocabulary.
+#  Levels are automatic: word 1-100 = Level 1, 101-200 = Level 2 …
+# ═══════════════════════════════════════════════════════════════
+
+# ── BATCH 1: FAMILY & PEOPLE (70) ───────────────────────────────
+tio | uncle | noun | gender=m; plural=tios; f=tia | O meu tio vive no Porto. | My uncle lives in Porto.
+tia | aunt | noun | gender=f; plural=tias | A minha tia cozinha melhor que eu. | My aunt cooks better than me.
+primo | cousin | noun | gender=m; plural=primos; f=prima | O primo vive em Lisboa. | The cousin lives in Lisbon.
+prima | cousin (f.) | noun | gender=f; plural=primas | A prima estuda medicina. | The cousin (f.) studies medicine.
+sobrinho | nephew | noun | gender=m; plural=sobrinhos; f=sobrinha | O meu sobrinho tem seis anos. | My nephew is six years old.
+neto | grandson | noun | gender=m; plural=netos; f=neta | O neto vive com os pais. | The grandson lives with his parents.
+neta | granddaughter | noun | gender=f; plural=netas | A neta já fala português. | The granddaughter already speaks Portuguese.
+madrinha | godmother | noun | gender=f; plural=madrinhas | A madrinha veio à festa. | The godmother came to the party.
+padrinho | godfather | noun | gender=m; plural=padrinhos | O padrinho pagou o jantar. | The godfather paid for dinner.
+genro | son-in-law | noun | gender=m; plural=genros; f=nora | O genro é muito simpático. | The son-in-law is very nice.
+nora | daughter-in-law | noun | gender=f; plural=noras | A nora vive em Braga. | The daughter-in-law lives in Braga.
+enteado | stepchild | noun | gender=m; plural=enteados | Tenho um enteado novo. | I have a new stepchild.
+namorado | boyfriend | noun | gender=m; plural=namorados; f=namorada | O namorado estuda na universidade. | The boyfriend studies at university.
+noivo | groom / fiancé | noun | gender=m; plural=noivos; f=noiva | O noivo esperou-a à porta. | The groom waited for her at the door.
+avós | grandparents | noun | gender=m; plural=avós | Os meus avós vivem no campo. | My grandparents live in the countryside.
+parente | relative | noun | gender=m; plural=parentes; note=familiar = close relative | O meu parente trabalha em Lisboa. | My relative works in Lisbon.
+gente | people | noun | note=3rd person singular: a gente é | A gente vive aqui. | People live here.
+homem | man | noun | gender=m; plural=homens; f=homem | O homem ao lado é o meu chefe. | The man next to me is my boss.
+mulher | woman | noun | gender=f; plural=mulheres | A mulher leu o livro todo. | The woman read the whole book.
+rapaz | guy / young man | noun | gender=m; plural=rapazes | O rapaz ajuda em casa. | The young man helps at home.
+menino | boy | noun | gender=m; plural=meninos | O menino joga à bola. | The boy plays football.
+menina | girl | noun | gender=f; plural=meninas | A menina tem uma boneca. | The girl has a doll.
+moço | young man | noun | gender=m; plural=moços; note=PT word for young man | O moço está a estudar medicina. | The young man is studying medicine.
+bebé | baby | noun | gender=m; plural=bebés | O bebé dorme a tarde toda. | The baby sleeps all afternoon.
+adulto | adult | noun | gender=m; plural=adultos | Já sou adulto. | I am already an adult.
+senhor | Mr / sir | noun | note=polite form for a man | Boa tarde, senhor. | Good afternoon, sir.
+senhora | Mrs / madam | noun | note=polite form for a woman | Boa noite, senhora. | Good night, madam.
+amigo | friend (m.) | noun | gender=m; plural=amigos; f=amiga | O meu amigo vive em Lisboa. | My friend lives in Lisbon.
+amiga | friend (f.) | noun | gender=f; plural=amigas | Ela é a minha melhor amiga. | She is my best friend.
+vizinho | neighbour | noun | gender=m; plural=vizinhos; f=vizinha | O vizinho tem um cão. | The neighbour has a dog.
+colega | colleague | noun | gender=m; plural=colegas | O meu colega trabalha comigo. | My colleague works with me.
+namorada | girlfriend / partner | noun | gender=f; plural=namoradas | A minha namorada estuda direito. | My girlfriend studies law.
+jovem | young | adj | conj=jovens | Eles são ainda jovens. | They are still young.
+simpático | nice / friendly | adj | conj=simpática; plural=simpáticos | Ela é muito simpática. | She is very friendly.
+gentil | kind | adj | note=BR legal, used for people | O senhor foi muito gentil. | The man was very kind.
+inteligente | intelligent | adj | conj=inteligente | O teu irmão é inteligente. | Your brother is intelligent.
+trabalhador | hard-working | adj | conj=trabalhadora; plural=trabalhadores | O meu pai é muito trabalhador. | My father is very hard-working.
+amoroso | loving | adj | conj=amorosa | A mãe é muito amorosa. | The mother is very loving.
+calado | quiet | adj | conj=calada | O meu irmão é mais calado que eu. | My brother is quieter than me.
+casar | to marry | verb | conj=casei, casaste, casou, casámos, casaram | Vou casar no verão. | I am getting married in summer.
+nascer | to be born | verb | conj=nascí, nasceste, nasceu, nascemos, nasceram | Ele nasceu em Lisboa. | He was born in Lisbon.
+crescer | to grow up | verb | conj=cresci, cresceste, cresceu | As crianças crescem depressa. | Children grow fast.
+viver | to live | verb | conj=vivo, vives, vive, vivemos, vivem | Vivemos em Portugal. | We live in Portugal.
+rir | to laugh | verb | conj=rio, riste,riu | Ele riu-se muito. | He laughed a lot.
+chorar | to cry | verb | conj=chorei, choraste, chorou | O bebé chora à noite. | The baby cries at night.
+convidar | to invite | verb | conj=convidei, convidaste, convidou, convidámos | Convidei o meu amigo. | I invited my friend.
+visitar | to visit | verb | conj=visitei, visitaste, visitou | Vou visitar os meus pais. | I am going to visit my parents.
+receber | to receive / welcome | verb | conj=recebi, recebeste, recebeu, recebemos | Recebemos os amigos em casa. | We welcomed the friends at home.
+chamar | to call | verb | conj=chamei, chamaste, chamou, chamámos | Como te chamas? | What is your name?
+conversar | to chat | verb | conj=conversei, conversaste, conversou | Gosto de conversar contigo. | I like chatting with you.
+abraçar | to hug | verb | conj=abraçei, abraçaste, abraçou | Abraçaram-se à porta. | They hugged at the door.
+beijar | to kiss | verb | conj=beijei, beijaste, beijou | A mãe beijou a filha. | The mother kissed the daughter.
+Quem é? | Who is it? | phrase | note=say when someone knocks | Quem é? | Who is it?
+Está cá o pai? | Is Dad home? | phrase | | Está cá o pai? | Is Dad home?
+Como está a família? | How is the family? | phrase | | Como está a família? | How is the family?
+Que bom! | How nice! | phrase | note=positive reaction | Que bom! | How nice!
+Parabéns! | Congratulations! | phrase | | Parabéns pelo teu emprego! | Congratulations on your job!
+Felicidades! | Congratulations! (reply) | phrase | note=reply to Parabéns | Felicidades! | Congratulations!
+Faz anos? | Is it your birthday? | phrase | note=colloquial | Hoje faz anos? | Is it your birthday today?
+
+# ── BATCH 2: FOOD & DRINK (55) ──────────────────────────────────
+feijão | beans | noun | gender=m; plural=feijãoes; note=BR feijão | Compro feijão no mercado. | I buy beans at the market.
+sal | salt | noun | gender=m; plural=sais | Não metas sal no arroz. | Don't put salt in the rice.
+açúcar | sugar | noun | gender=m; note=invariable | O café está sem açúcar. | The coffee has no sugar.
+laranja | orange | noun | gender=f; plural=laranjas | Com uma laranja de manhã. | With an orange in the morning.
+salada | salad | noun | gender=f; plural=saladas | Vou comer uma salada. | I am going to eat a salad.
+chá | tea | noun | gender=m; plural=chás | Gosto de chá à tarde. | I like tea in the afternoon.
+chocolate | chocolate | noun | gender=m; plural=chocolates | As crianças gostam de chocolate. | Children like chocolate.
+suco | juice | noun | gender=m; plural=sucos | Um sumo de laranja, por favor. | An orange juice, please.
+copo | glass / cup | noun | gender=m; plural=copos | Bebe um copo de água. | Drink a glass of water.
+garfo | fork | noun | gender=m; plural=garfos | Preciso de um garfo. | I need a fork.
+faca | knife | noun | gender=f; plural=facas | Esta faca está suja. | This knife is dirty.
+prato | plate / dish | noun | gender=m; plural=pratos | O prato está limpo. | The plate is clean.
+panela | pot / pan | noun | gender=f; plural=panelas | A panela está no fogão. | The pot is on the stove.
+forno | oven | noun | gender=m; plural=fornos | O frango está no forno. | The chicken is in the oven.
+fogão | stove | noun | gender=m; plural=fogões | Cozinho no fogão. | I cook on the stove.
+fome | hunger | noun | gender=f; note=tenho fome = I am hungry | Tenho fome. | I am hungry.
+sede | thirst | noun | gender=f; note=tenho sede = I am thirsty | Tenho sede. | I am thirsty.
+sabor | flavour / taste | noun | gender=m; plural=sabores | Este sabor é ótimo. | This flavour is great.
+receita | recipe | noun | gender=f; plural=receitas | A receita é fácil. | The recipe is easy.
+cozinhar | to cook | verb | conj=cozinhei, cozinhaste, cozinhou | Gosto de cozinhar em casa. | I like cooking at home.
+cozer | to boil / cook | verb | conj=cozi, cozeste, cozeu | Cozem o arroz durante 15 minutos. | They boil the rice for 15 minutes.
+pequeno-almoço | breakfast | noun | gender=m; note=PT pequeno-almoço, BR café da manhã | O pequeno-almoço está pronto. | Breakfast is ready.
+almorçar | to have lunch | verb | conj=almorcei, almoçaste, almoçou | Vamos almoçar ao meio-dia. | We are going to have lunch at noon.
+jantar | to have dinner | noun | gender=m; plural=jantares; note=also verb "to dine" | O jantar está na mesa. | Dinner is on the table.
+apetite | appetite | noun | gender=m; | Não tenho apetite hoje. | I have no appetite today.
+bebida | drink / beverage | noun | gender=f; plural=bebidas | A bebida está fria. | The drink is cold.
+sobremesa | dessert | noun | gender=f; plural=sobremesas | Vom a sobremesa. | I am full after the dessert.
+salgado | savoury | adj | | Prefiro o sabor salgado. | I prefer the savoury flavour.
+doce | sweet | adj | | Este bolo é doce. | This cake is sweet.
+amargo | bitter | adj | conj=amarga | O café está amargo. | The coffee is bitter.
+fresco | fresh | adj | conj=fresca | O peixe está fresco. | The fish is fresh.
+delicioso | delicious | adj | conj=deliciosa | O jantar está delicioso. | The dinner is delicious.
+saboroso | tasty | adj | conj=saborosa | Este pão é saboroso. | This bread is tasty.
+gostoso | tasty | adj | conj=gostosa; note=very common in Brazil | A comida está gostosa. | The food is tasty.
+fartura | abundance | noun | gender=f; note=a fartura = plenty | Havia fartura de comida. | There was plenty of food.
+tempero | seasoning / spice | noun | gender=m; plural=temperos | Falta sal nos temperos. | The seasonings need salt.
+pimenta | pepper | noun | gender=f; plural=pimentas | Ponho pimenta na carne. | I put pepper on the meat.
+talho | butcher's shop | noun | gender=m; plural=talhos; note=PT: the butcher, BR = açougue | Compro carne no talho. | I buy meat at the butcher's.
+refeição | meal | noun | gender=f; plural=refeições | A refeição está pronta. | The meal is ready.
+talheres | cutlery | noun | gender=m; plural=used only; note=os talheres = the cutlery | Os talheres estão limpos. | The cutlery is clean.
+guardanapo | napkin | noun | gender=m; plural=guardanapos | Preciso de um guardanapo. | I need a napkin.
+conta | bill / check | noun | gender=f; plural=contas | A conta, por favor. | The bill, please.
+gorjeta | tip | noun | gender=f; plural=gorjetas | Deixei uma boa gorjeta. | I left a good tip.
+pedido | order | noun | gender=m; plural=pedidos | O pedido chegou. | The order arrived.
+desejo | wish / desire | noun | gender=m; plural=desejos | O meu desejo é viajar. | My wish is to travel.
+Comida para levar? | takeaway | phrase | | Comida para levar, por favor. | Takeaway food, please.
+A conta, por favor. | The bill, please. | phrase | note=restaurant phrase | A conta, por favor. | The bill, please.
+Está muito bom. | It's very good (food). | phrase | note=reply when food arrives | Está muito bom. | It's very good.
+Um café, por favor. | A coffee, please. | phrase | | Um café, por favor. | A coffee, please.
+Põe o sal, por favor. | Pass the salt, please. | phrase | | Põe o sal, por favor. | Pass the salt, please.
+Obrigado pela refeição. | Thank you for the meal. | phrase | | Obrigado pela refeição. | Thank you for the meal.

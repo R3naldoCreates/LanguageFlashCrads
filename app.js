@@ -912,9 +912,11 @@
 
   function searchHTML(l) {
     var q = state.search || '';
-    return '<div class="searchbox-wrap">' +
+    return '<div class="searchrow">' +
       '<input id="searchbox" class="searchinput" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" ' +
       'placeholder="Search ' + esc(l.meta.frontLabel) + ' or ' + esc(l.meta.backLabel) + '…" value="' + esc(q) + '" aria-label="Search words">' +
+      '<button class="btn small missbtn" data-act="missing-add" data-text="' + esc(q.trim()) + '"' +
+      (!q.trim() ? ' disabled' : '') + ' title="Add what you typed to missing words">＋ Missing</button>' +
       '</div><div id="searchres">' + searchResultsHTML(l) + '</div>';
   }
 
@@ -1700,13 +1702,13 @@
       case 'missing-add': {
         var lm = L();
         if (!lm) return;
-        var text = el.getAttribute('data-text') || state.search || '';
+        var text = (el.getAttribute('data-text') || state.search || '').trim();
+        if (!text) { showToast('Type a word first'); return; }
         if (missingAdd(lm.meta.code, text)) {
           showToast('＋ “' + text + '” saved to missing words');
         } else {
           showToast('Already in missing words');
         }
-        state.search = '';
         render();
         return;
       }
@@ -1979,6 +1981,13 @@
         var res = document.getElementById('searchres');
         var l = L();
         if (res && l) res.innerHTML = searchResultsHTML(l);
+        var mb = document.querySelector('.missbtn');
+        if (mb) {
+          var tv = t.value.trim();
+          mb.setAttribute('data-text', tv);
+          if (tv) mb.removeAttribute('disabled');
+          else mb.setAttribute('disabled', 'disabled');
+        }
       }
     });
     document.addEventListener('touchstart', onTouchStart, { passive: true });

@@ -923,3 +923,13 @@ html, body {
 }
 .empty.small { padding: 20px 12px; font-size: 14px; }
 .empty.small .big-ico { font-size: 26px; margin-bottom: 6px; }
+
+.searchrow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+.searchrow .searchinput { flex: 1 1 auto; min-width: 0; }
+.missbtn { flex: 0 0 auto; white-space: nowrap; }
+.missbtn[disabled] { opacity: .4; cursor: default; }

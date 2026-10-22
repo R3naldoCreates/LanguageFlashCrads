@@ -1,12 +1,12 @@
 ﻿/* Language Flash Cards — offline cache (service worker)
-   Strategy: network-first, cache fallback. Fresh files whenever you are
-   online; the cached copy is used only when offline. */
-var CACHE = 'lfc-v12';
+   Strategy: network-first with cache bypass, cache fallback. Always fetches
+   the freshest files when online; the cached copy is used only when offline. */
+var CACHE = 'lfc-v13';
 var ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './style.css?v=13',
+  './app.js?v=13',
   './languages.json',
   './manifest.webmanifest',
   './icons/icon-192.png',
@@ -19,7 +19,13 @@ var ASSETS = [
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); })
+    caches.open(CACHE).then(function (c) {
+      return Promise.all(ASSETS.map(function (u) {
+        return fetch(u, { cache: 'reload' }).then(function (r) {
+          if (r && r.ok) return c.put(u, r);
+        }).catch(function () {});
+      }));
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 
@@ -42,7 +48,7 @@ self.addEventListener('fetch', function (e) {
   if (url.origin !== location.origin) return;
 
   e.respondWith(
-    fetch(req).then(function (res) {
+    fetch(req, { cache: 'no-store' }).then(function (res) {
       if (res && res.ok) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });

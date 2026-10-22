@@ -6,6 +6,7 @@
   'use strict';
 
   var PREFIX = 'lfc:v1:';
+  var APP_VERSION = 'v13';
 
   /* ───────────────────────── utils ───────────────────────── */
 
@@ -462,7 +463,15 @@
 
   function tolearnEntries(l) {
     var s = Store.get(l.meta.code);
-    return l.entries.filter(function (e) { return s.has(e.id); });
+    var out = [];
+    var seen = {};
+    l.entries.forEach(function (e) {
+      if (!s.has(e.id) || seen[e.id]) return;
+      if (!e.front || !e.back) return;
+      seen[e.id] = 1;
+      out.push(e);
+    });
+    return out;
   }
 
   function featVal(e, key) {
@@ -694,8 +703,9 @@
         }).catch(function () { l.lexicon = []; });
       }));
     }).then(function () {
-      /* launch bot: pull in words from the phone word file, then repair old saves */
+      /* launch bot: repair old saves first, then pull in words from the phone word file */
       state.langs.forEach(function (l) {
+        try { sanitizeLang(l); } catch (e) {}
         try { resolveMissing(l, 'file'); } catch (e) {}
         try { sanitizeLang(l); } catch (e) {}
       });
@@ -902,7 +912,7 @@
       var n = poolFor(l, b.personal ? [] : p.themes, b.id).length;
       rangeBody += '<button class="chip' + (p.range === b.id ? ' active' : '') + (n === 0 ? ' empty' : '') + '" data-act="pick" data-key="range" data-val="' + b.id + '">' +
         (b.done ? '✅' : '') + (b.personal ? '⭐ Personal' : b.from + '–' + b.to) +
-        ' <span class="count">' + (n === 0 ? '0' : b.known + '★/' + n) + '</span></button>';
+        ' <span class="count">' + (n === 0 ? '0' : b.known + '/' + n + '★') + '</span></button>';
     });
     rangeBody += '</div>';
     if (next && p.range === 'all') {
@@ -1050,10 +1060,13 @@
 
   /* deck words first, personal (bot-added) words last */
   function mergeExtras(l) {
+    var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
+    if (base > l.entries.length) base = l.entries.length;
+    l.entries = l.entries.slice(0, base);
+    l.baseCount = base;
     var seen = {};
     var extras = extraLoad(l.meta.code).filter(function (e) { return e && e.front && e.back && e.id; });
     l.entries.forEach(function (e) { seen[e.id] = true; });
-    l.baseCount = l.entries.length;
     extras.forEach(function (e) {
       if (seen[e.id]) return;
       seen[e.id] = true;
@@ -1068,15 +1081,19 @@
   }
 
   function normalizeFeatures(f) {
-    if (Array.isArray(f) && f.length) return f;
-    if (f && typeof f === 'object') {
-      var arr = [];
+    var arr = [];
+    if (Array.isArray(f)) {
+      f.forEach(function (x) {
+        if (x && typeof x === 'object' && x.key) {
+          arr.push({ key: x.key, value: String(x.value == null ? '' : x.value) });
+        }
+      });
+    } else if (f && typeof f === 'object') {
       Object.keys(f).forEach(function (k) {
         if (f[k]) arr.push({ key: k, value: String(f[k]) });
       });
-      if (arr.length) return arr;
     }
-    return [{ key: 'theme', value: 'geral' }];
+    return arr.length ? arr : [{ key: 'theme', value: 'geral' }];
   }
 
   function personalCount(l) {
@@ -1084,33 +1101,78 @@
     return Math.max(0, l.entries.length - base);
   }
 
-  /* repair saves from older versions so nothing breaks the flow */
+  /* repair saves from older versions: valid array features, unique ids,
+     no duplicate/invalid personal cards, no stale To Learn ids */
   function sanitizeLang(l) {
     var code = l.meta.code;
-
-    /* legacy personal cards: object features and/or colliding deck id */
-    var extras = extraLoad(code);
-    var changed = false;
+    var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
+    if (base > l.entries.length) base = l.entries.length;
+    var deck = l.entries.slice(0, base);
     var deckIds = {};
-    for (var i = 0; i < l.baseCount && i < l.entries.length; i++) deckIds[l.entries[i].id] = 1;
-    extras.forEach(function (e) {
-      if (!e || !e.front || !e.back) return;
-      if (e.features && !Array.isArray(e.features)) { e.features = normalizeFeatures(e.features); changed = true; }
-      if (!e.features || !e.features.length) { e.features = [{ key: 'theme', value: 'geral' }]; changed = true; }
-      if (deckIds[e.id]) {
-        e.id = hashId(code + '|personal|' + e.front + '|' + (e.pos || '?'));
+    deck.forEach(function (e) {
+      if (!e) return;
+      if (!Array.isArray(e.features)) e.features = normalizeFeatures(e.features);
+      e.pos = e.pos || '';
+      if (!e.id) e.id = hashId(code + '|' + e.front + '|' + e.pos);
+      deckIds[e.id] = 1;
+    });
+
+    var extras = [];
+    var used = {};
+    var idMap = {};
+    var keys = {};
+    var changed = false;
+    extraLoad(code).forEach(function (e) {
+      if (!e || typeof e.front !== 'string' || typeof e.back !== 'string' || !e.front.trim() || !e.back.trim()) {
+        changed = true;
+        return;
+      }
+      var pos = typeof e.pos === 'string' ? e.pos : '';
+      if (!Array.isArray(e.features) || typeof e.pos !== 'string') changed = true;
+      var key = normSearch(e.front) + '|' + normSearch(e.back) + '|' + pos;
+      if (keys[key]) { changed = true; return; }
+      keys[key] = 1;
+      var oldId = e.id;
+      var id = oldId;
+      if (!id || deckIds[id] || used[id]) {
+        var stem = code + '|personal|' + e.front + '|' + (pos || '?');
+        var n = 1;
+        id = hashId(stem);
+        while (deckIds[id] || used[id]) id = hashId(stem + '|' + (n++));
+        if (oldId && oldId !== id && !deckIds[oldId] && !idMap.hasOwnProperty(oldId)) idMap[oldId] = id;
         changed = true;
       }
+      used[id] = 1;
+      extras.push({
+        id: id, front: e.front, back: e.back, pos: pos,
+        features: normalizeFeatures(e.features),
+        example: e.example || '',
+        exampleTrans: e.exampleTrans || '',
+        file: 'bot', line: 0
+      });
     });
     if (changed) extraSave(code, extras);
 
-    /* drop To Learn / SRS ids that no longer exist (old versions, cleared decks) */
+    l.baseCount = base;
+    l.entries = deck.concat(extras);
+    l._lex = null;
+
+    var s = Store.get(code), sc = false;
+    Object.keys(idMap).forEach(function (oldId) {
+      if (s.has(oldId)) { s.delete(oldId); s.add(idMap[oldId]); sc = true; }
+    });
     var ids = {};
     l.entries.forEach(function (e) { ids[e.id] = 1; });
-    var s = Store.get(code), sc = false;
-    s.forEach(function (id) { if (!ids[id]) { s.delete(id); sc = true; } });
+    var size = s.size;
+    s.forEach(function (id) { if (!ids[id]) s.delete(id); });
+    if (s.size !== size) sc = true;
     if (sc) Store.save(code, s);
+
     var m = srsLoad(code), mc = false;
+    Object.keys(idMap).forEach(function (oldId) {
+      if (m[oldId] && !m[idMap[oldId]]) { m[idMap[oldId]] = m[oldId]; mc = true; }
+      if (m[oldId]) { delete m[oldId]; mc = true; }
+    });
     Object.keys(m).forEach(function (id) { if (!ids[id]) { delete m[id]; mc = true; } });
     if (mc) srsSave(code, m);
 
@@ -1575,25 +1637,46 @@
   }
 
   function render() {
-    var html = '';
-    if (state.loadError) html += bannerHTML(state.loadError);
-    switch (state.view) {
-      case 'home': html += homeHTML(); break;
-      case 'hub': html += hubHTML(); break;
-      case 'basic': html += studyHTML('basic'); break;
-      case 'tol': html += studyHTML('tol'); break;
-      case 'testSetup': html += testSetupHTML(); break;
-      case 'testRun': html += testRunHTML(); break;
-      case 'testResult': html += testResultHTML(); break;
-      case 'stats': html += statsHTML(); break;
-      default: html += homeHTML();
+    try {
+      var html = '';
+      if (state.loadError) html += bannerHTML(state.loadError);
+      switch (state.view) {
+        case 'home': html += homeHTML(); break;
+        case 'hub': html += hubHTML(); break;
+        case 'basic': html += studyHTML('basic'); break;
+        case 'tol': html += studyHTML('tol'); break;
+        case 'testSetup': html += testSetupHTML(); break;
+        case 'testRun': html += testRunHTML(); break;
+        case 'testResult': html += testResultHTML(); break;
+        case 'stats': html += statsHTML(); break;
+        default: html += homeHTML();
+      }
+      app.innerHTML = html;
+      if (state.view === 'testRun' && state.test &&
+          (state.test.style === 'typing' || state.test.style === 'listen')) {
+        var inp = document.getElementById('typeinput');
+        if (inp) inp.focus();
+      }
+    } catch (err) {
+      try {
+        app.innerHTML = '<div class="banner">⚠️ Saved data confused this screen.<br><code>' +
+          esc(String((err && err.message) || err)) + '</code></div>' +
+          '<button class="btn primary block" data-act="repair">🛠 Repair saved data &amp; reload</button>' +
+          '<button class="btn block" data-act="reload-app">↻ Reload app</button>';
+      } catch (e2) {}
+      if (typeof console !== 'undefined' && console.error) console.error(err);
     }
-    app.innerHTML = html;
-    if (state.view === 'testRun' && state.test &&
-        (state.test.style === 'typing' || state.test.style === 'listen')) {
-      var inp = document.getElementById('typeinput');
-      if (inp) inp.focus();
-    }
+  }
+
+  /* rebuild every language from its saved data, drop broken sessions */
+  function repairData() {
+    state.basic = null;
+    state.tol = null;
+    state.test = null;
+    state.testCfg = null;
+    (state.langs || []).forEach(function (l) {
+      try { sanitizeLang(l); } catch (e) {}
+    });
   }
 
   function bannerHTML(msg) {
@@ -1624,7 +1707,7 @@
     }
     h += '<div class="home-grid">';
     state.langs.forEach(function (l) {
-      var n = Store.count(l.meta.code);
+      var n = tolearnEntries(l).length;
       h += '<button class="lang-card" data-act="go-lang" data-code="' + esc(l.meta.code) + '">' +
         '<span class="flag">' + esc(l.meta.emoji) + '</span>' +
         '<span class="info">' +
@@ -1646,7 +1729,7 @@
     var errCount = state.allIssues.filter(function (i) { return !/derived/.test(i.msg); }).length;
     h += '<div class="home-foot">Decks edited in data/*.txt · ' +
       (errCount ? '<b style="color:var(--bad)">' + errCount + ' file issue(s) — run node tools/validate.js</b>' : 'files OK') +
-      '<br>Add a language: drop a .txt in data/ and list it in languages.json.</div>';
+      '<br>Add a language: drop a .txt in data/ and list it in languages.json. · app ' + APP_VERSION + '</div>';
     h += '<div class="spacer"></div>';
     return h;
   }
@@ -1682,7 +1765,7 @@
     var counts = { all: l.entries.length };
     l.posOrder.forEach(function (k) { counts[k] = 0; });
     l.entries.forEach(function (e) { if (counts[e.pos] != null) counts[e.pos]++; });
-    var tl = Store.count(l.meta.code);
+    var tl = tolearnEntries(l).length;
 
     var h = topbarHTML(l.meta.emoji + ' ' + esc(l.meta.name), l.entries.length + ' cards');
     h += '<div class="section-label">Word type</div><div class="chiprow">';
@@ -1811,7 +1894,7 @@
 
     var chips = '', forms = '';
     (Array.isArray(e.features) ? e.features : []).forEach(function (f) {
-      if (!f.value || f.key === 'theme') return;
+      if (!f || !f.key || !f.value || f.key === 'theme') return;
       if (LONG_KEYS[f.key] || f.value.length > 22) {
         var items = f.value.split(',').map(function (s) { return '<li>' + esc(s.trim()) + '</li>'; }).join('');
         forms += '<div class="forms"><div class="forms-title">' + esc(featLabel(l, f.key)) + '</div><ul>' + items + '</ul></div>';
@@ -2053,13 +2136,15 @@
     nav('basic');
   }
 
-  function startTol() {    var l = L();
-    var p = getPick(l.meta.code);
+  function startTol() {
+    var l = L();
     var pool = tolearnEntries(l);
-    if (!pool.length) pool = pickPool(l);
+    if (!pool.length) {
+      showToast('Your To Learn list is empty — star words first');
+      return;
+    }
     if (state.shuffle) pool = shuffleArr(pool);
-    if (p.count > 0) pool = pool.slice(0, p.count);
-    state.tol = { deck: pool, i: 0, flipped: false, title: '⭐ ' + pickSummary(l) };
+    state.tol = { deck: pool, i: 0, flipped: false, title: '⭐ To Learn' };
     nav('tol');
   }
 
@@ -2222,7 +2307,7 @@
       reader.onload = function () {
         try {
           var n = Store.importMerge(JSON.parse(reader.result));
-          state.langs.forEach(mergeExtras);
+          state.langs.forEach(function (l) { mergeExtras(l); sanitizeLang(l); });
           alert('Imported ' + n + ' card(s) into To Learn decks.');
           render();
         } catch (err) {
@@ -2243,6 +2328,13 @@
       case 'theme': toggleTheme(); return;
       case 'export': exportProgress(); return;
       case 'import': importProgress(); return;
+      case 'repair':
+        repairData();
+        try { location.reload(); } catch (e) {}
+        return;
+      case 'reload-app':
+        try { location.reload(); } catch (e) {}
+        return;
       case 'reload':
         loadAll().then(function () { render(); });
         return;
@@ -2679,16 +2771,37 @@
     document.addEventListener('touchmove', onTouchMove, { passive: true });
     document.addEventListener('touchend', onTouchEnd, { passive: false });
 
-    /* offline web app (PWA) */
+    /* offline web app (PWA) — auto-update when online */
     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator &&
         (location.protocol === 'https:' ||
          location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-      navigator.serviceWorker.register('sw.js').then(function () {
-        /* ask the browser to fetch a newer service worker right away */
-        if (navigator.serviceWorker.ready) {
-          navigator.serviceWorker.ready.then(function (reg) { if (reg.update) reg.update(); });
-        }
+      var hadController = !!navigator.serviceWorker.controller;
+      var reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!hadController || reloading) return;
+        reloading = true;
+        showToast('🔄 New version installed — reloading');
+        setTimeout(function () { try { location.reload(); } catch (e) {} }, 800);
+      });
+      navigator.serviceWorker.register('sw.js').then(function (reg) {
+        if (reg.update) reg.update();
+        reg.addEventListener('updatefound', function () {
+          var nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', function () {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              try { nw.postMessage('skipWaiting'); } catch (e) {}
+            }
+          });
+        });
+        setInterval(function () { if (reg.update) reg.update(); }, 30 * 60 * 1000);
       }).catch(function () {});
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'visible') return;
+        navigator.serviceWorker.getRegistration().then(function (reg) {
+          if (reg && reg.update) reg.update();
+        }).catch(function () {});
+      });
     }
 
     loadAll().then(render);
@@ -2736,7 +2849,10 @@
     startPick: startPick,
     getPick: getPick,
     setPick: setPick,
-    normalizeFeatures: normalizeFeatures
+    normalizeFeatures: normalizeFeatures,
+    mergeExtras: mergeExtras,
+    repairData: repairData,
+    appVersion: APP_VERSION
   };
 
   if (typeof module !== 'undefined' && module.exports) {

@@ -166,7 +166,9 @@
         app: 'language-flash-cards', version: 2, exported: new Date().toISOString(),
         tolearn: out, srs: srs, acc: acc,
         daily: dailyLoad(), goal: getGoal(),
-        missing: missingExport()
+        missing: missingExport(),
+        extra: extraExport(),
+        lexfiles: lextextExport()
       };
     },
     importMerge: function (data) {
@@ -210,6 +212,20 @@
           (data.missing[code] || []).forEach(function (w) {
             if (typeof w === 'string') missingAdd(code, w);
           });
+        });
+      }
+      if (data.extra && typeof data.extra === 'object') {
+        Object.keys(data.extra).forEach(function (code) {
+          (data.extra[code] || []).forEach(function (e) {
+            if (e && e.id && e.front && e.back) extraAdd(code, e);
+          });
+        });
+      }
+      if (data.lexfiles && typeof data.lexfiles === 'object') {
+        Object.keys(data.lexfiles).forEach(function (code) {
+          if (!lextextGet(code) && typeof data.lexfiles[code] === 'string') {
+            lextextSet(code, data.lexfiles[code]);
+          }
         });
       }
       return changed;
@@ -658,7 +674,20 @@
       });
       state.byCode = byCode;
       state.langs = Object.keys(byCode).map(function (c) { return byCode[c]; });
+      /* merge cards created by the bot on earlier runs */
+      state.langs.forEach(mergeExtras);
+      /* built-in word bank per language (optional file) */
       state.allIssues = issues;
+      return Promise.all(state.langs.map(function (l) {
+        return fetchText('data/lexicon-' + l.meta.code + '.txt').then(function (body) {
+          l.lexicon = parseLexiconText(body);
+        }).catch(function () { l.lexicon = []; });
+      }));
+    }).then(function () {
+      /* bot: pull in words from the phone word file on every launch */
+      state.langs.forEach(function (l) {
+        try { resolveMissing(l, 'file'); } catch (e) {}
+      });
       state.loaded = true;
     }).catch(function (err) {
       state.loadError = err && err.message ? err.message : String(err);
@@ -728,8 +757,18 @@
 
   function rangeList(l) {
     var out = [];
-    for (var b = 0; b * 100 < l.entries.length; b++) {
-      out.push({ id: String(b), b: b, from: b * 100 + 1, to: Math.min(b * 100 + 100, l.entries.length) });
+    var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
+    var total = l.entries.length;
+    for (var b = 0; b * 100 < base; b++) {
+      var from = b * 100 + 1;
+      var to = Math.min(b * 100 + 100, base);
+      out.push({ id: String(b), b: b, from: from, to: to, personal: false, size: to - from + 1 });
+    }
+    if (total > base) {
+      out.push({
+        id: 'p', b: -1, from: base + 1, to: total,
+        personal: true, size: total - base
+      });
     }
     return out;
   }
@@ -737,17 +776,25 @@
   function rangeLabel(l, id) {
     var r = null;
     rangeList(l).forEach(function (x) { if (x.id === id) r = x; });
-    return r ? (r.from + '–' + r.to) : '';
+    return r ? (r.personal ? 'Personal' : (r.from + '–' + r.to)) : '';
   }
 
   /* entries matching a theme + range selection */
   function poolFor(l, themes, range) {
-    var from = range === 'all' ? 0 : parseInt(range, 10) * 100;
-    var to = from + 100;
+    var from, to;
+    if (range === 'all') {
+      from = 0; to = l.entries.length;
+    } else if (range === 'p') {
+      var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
+      from = base; to = l.entries.length;
+    } else {
+      from = parseInt(range, 10) * 100;
+      to = from + 100;
+    }
     var sel = Array.isArray(themes) ? themes : (themes && themes !== 'all' ? [themes] : []);
     var pool = [];
     l.entries.forEach(function (e, i) {
-      if (from && (i < from || i >= to)) return;
+      if (range !== 'all' && (i < from || i >= to)) return;
       if (sel.length && sel.indexOf(featVal(e, 'theme')) < 0) return;
       pool.push(e);
     });
@@ -762,8 +809,13 @@
     if (!p.themes.length) bits.push('All topics');
     else if (p.themes.length === 1) bits.push(themeLabel(p.themes[0]));
     else bits.push(p.themes.length + ' topics');
-    if (p.range !== 'all') bits.push('words ' + rangeLabel(l, p.range));
-    else bits.push('random from all');
+    if (p.range === 'all') {
+      bits.push('random from all');
+    } else {
+      var pr = null;
+      rangeList(l).forEach(function (x) { if (x.id === p.range) pr = x; });
+      bits.push(pr && pr.personal ? 'Personal words' : 'words ' + rangeLabel(l, p.range));
+    }
     bits.push(p.count > 0 ? p.count + ' cards' : 'every card');
     return bits.join(' · ');
   }
@@ -791,6 +843,7 @@
         if (rec && rec.n > 0 && rec.s >= 3) known++;
       }
       out.push({ id: r.id, from: r.from, to: r.to, size: r.to - r.from + 1, known: known,
+        personal: r.personal,
         done: known >= Math.ceil((r.to - r.from + 1) * 0.9) });
     });
     return out;
@@ -827,12 +880,12 @@
     blocks.forEach(function (b) {
       var n = poolFor(l, p.themes, b.id).length;
       rangeBody += '<button class="chip' + (p.range === b.id ? ' active' : '') + (n === 0 ? ' empty' : '') + '" data-act="pick" data-key="range" data-val="' + b.id + '">' +
-        (b.done ? '✅' : '') + b.from + '–' + b.to +
+        (b.done ? '✅' : '') + (b.personal ? '⭐ Personal' : b.from + '–' + b.to) +
         ' <span class="count">' + (n === 0 ? '0' : b.known + '★/' + n) + '</span></button>';
     });
     rangeBody += '</div>';
     if (next && p.range === 'all') {
-      rangeBody += '<p class="home-foot">Next unfinished block: <b>words ' + next.from + '–' + next.to + '</b> (★' +
+      rangeBody += '<p class="home-foot">Next unfinished block: <b>' + (next.personal ? '⭐ Personal' : 'words ' + next.from + '–' + next.to) + '</b> (★' +
         next.known + '/' + next.size + ') <button class="mini-link" data-act="use-next" data-b="' + next.id + '">select it</button></p>';
     }
     h += sectionHTML('range', 2, 'Choose the words', rangeSum, rangeBody);
@@ -942,6 +995,202 @@
     return out;
   }
 
+  /* ───────────────── bot: extra cards + word files ──────────── */
+
+  function extraLoad(code) {
+    try {
+      var a = JSON.parse(localStorage.getItem(PREFIX + 'extra:' + code) || '[]');
+      return Array.isArray(a) ? a : [];
+    } catch (e) { return []; }
+  }
+
+  function extraSave(code, arr) {
+    try { localStorage.setItem(PREFIX + 'extra:' + code, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  function extraAdd(code, entry) {
+    var a = extraLoad(code);
+    for (var i = 0; i < a.length; i++) if (a[i].id === entry.id) return false;
+    a.push(entry);
+    extraSave(code, a);
+    return true;
+  }
+
+  function extraExport() {
+    var out = {};
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf(PREFIX + 'extra:') === 0) {
+        try { out[k.slice((PREFIX + 'extra:').length)] = JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) {}
+      }
+    }
+    return out;
+  }
+
+  /* deck words first, personal (bot-added) words last */
+  function mergeExtras(l) {
+    var seen = {};
+    var extras = extraLoad(l.meta.code).filter(function (e) { return e && e.front && e.back && e.id; });
+    l.entries.forEach(function (e) { seen[e.id] = true; });
+    l.baseCount = l.entries.length;
+    extras.forEach(function (e) {
+      if (seen[e.id]) return;
+      seen[e.id] = true;
+      l.entries.push({
+        id: e.id, front: e.front, back: e.back, pos: e.pos || '',
+        features: e.features || { theme: 'geral' },
+        example: e.example || '', exampleTrans: e.exampleTrans || '',
+        file: 'bot', line: 0
+      });
+    });
+    l._lex = null;
+  }
+
+  function lextextGet(code) {
+    try { return localStorage.getItem(PREFIX + 'lextext:' + code) || ''; } catch (e) { return ''; }
+  }
+
+  function lextextSet(code, txt) {
+    try { localStorage.setItem(PREFIX + 'lextext:' + code, txt); } catch (e) {}
+  }
+
+  function lextextClear(code) {
+    try { localStorage.removeItem(PREFIX + 'lextext:' + code); } catch (e) {}
+  }
+
+  function lextextExport() {
+    var out = {};
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf(PREFIX + 'lextext:') === 0) {
+        try { out[k.slice((PREFIX + 'lextext:').length)] = localStorage.getItem(k) || ''; } catch (e) {}
+      }
+    }
+    return out;
+  }
+
+  function parseLexiconText(txt) {
+    var out = [];
+    var lines = String(txt || '').split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line || line.charAt(0) === '#' || line.charAt(0) === '@') continue;
+      var front = '', back = '', pos = '', feats = {};
+      if (line.indexOf('|') >= 0) {
+        var p = line.split('|');
+        front = (p[0] || '').trim();
+        back = (p[1] || '').trim();
+        pos = (p[2] || '').trim();
+        feats = p[3] ? parseFeatures(p[3].trim()) : {};
+      } else {
+        var m = line.split(/\s+=\s+|\t+|\s+[–—-]\s+/);
+        if (m.length < 2) continue;
+        front = (m[0] || '').trim();
+        back = (m[1] || '').trim();
+      }
+      if (!front || !back) continue;
+      out.push({ front: front, back: back, pos: pos, features: feats });
+    }
+    return out;
+  }
+
+  function editDist(a, b) {
+    var m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    if (Math.abs(m - n) > 2) return 9;
+    var prev = [], cur = [], i, j;
+    for (j = 0; j <= n; j++) prev[j] = j;
+    for (i = 1; i <= m; i++) {
+      cur[0] = i;
+      for (j = 1; j <= n; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+      }
+      for (j = 0; j <= n; j++) prev[j] = cur[j];
+    }
+    return prev[n];
+  }
+
+  function lexiconFor(l) {
+    if (l._lex) return l._lex;
+    var out = [], seen = {};
+    function push(e, src) {
+      var k = normSearch(e.front) + '§' + normSearch(e.back);
+      if (!k || seen[k]) return;
+      seen[k] = true;
+      out.push({ front: e.front, back: e.back, pos: e.pos, features: e.features, id: e.id, src: src });
+    }
+    l.entries.forEach(function (e) {
+      push({ front: e.front, back: e.back, pos: e.pos, features: e.features, id: e.id }, 'deck');
+    });
+    (l.lexicon || []).forEach(function (e) { push(e, 'bank'); });
+    var txt = lextextGet(l.meta.code);
+    if (txt) parseLexiconText(txt).forEach(function (e) { push(e, 'file'); });
+    l._lex = out;
+    return out;
+  }
+
+  function lexFind(l, q) {
+    var nq = normSearch(q);
+    if (!nq) return null;
+    var lex = lexiconFor(l);
+    var best = null, bestScore = 1e9;
+    for (var i = 0; i < lex.length; i++) {
+      var e = lex[i];
+      var nf = normSearch(e.front), nb = normSearch(e.back);
+      if (nf === nq || nb === nq) return { entry: e, exact: true };
+      var limit = nq.length <= 4 ? 0 : (nq.length <= 7 ? 1 : 2);
+      if (!limit) continue;
+      var d = Math.min(editDist(nq, nf), editDist(nq, nb));
+      if (d <= limit && d < bestScore) { bestScore = d; best = e; }
+      else if (nf.indexOf(nq) === 0 || nb.indexOf(nq) === 0) {
+        if (1 < bestScore) { bestScore = 1; best = e; }
+      }
+    }
+    return best ? { entry: best, exact: false } : null;
+  }
+
+  function personalAdd(l, src) {
+    var code = l.meta.code;
+    var pos = src.pos || '';
+    var id = hashId(code + '|' + src.front + '|' + (pos || '?'));
+    for (var i = 0; i < l.entries.length; i++) if (l.entries[i].id === id) return { id: id, isNew: false };
+    var e = {
+      id: id, front: src.front, back: src.back, pos: pos,
+      features: { theme: 'geral' }, example: '', exampleTrans: '',
+      file: 'bot', line: 0
+    };
+    if (!extraAdd(code, e)) return { id: id, isNew: false };
+    l.entries.push(e);
+    l._lex = null;
+    return { id: id, isNew: true };
+  }
+
+  function resolveOne(l, word, mode) {
+    var hit = lexFind(l, word);
+    if (hit && mode === 'file' && hit.entry.src !== 'file') hit = null;
+    if (!hit) return { ok: false };
+    var r = personalAdd(l, hit.entry);
+    Store.add(l.meta.code, r.id);
+    missingRemove(l.meta.code, word);
+    return { ok: true, entry: hit.entry, isNew: r.isNew };
+  }
+
+  function resolveMissing(l, mode) {
+    var code = l.meta.code;
+    var miss = missingLoad(code);
+    if (!miss.length) return { resolved: 0, added: 0 };
+    var keep = [], resolved = 0, added = 0;
+    miss.forEach(function (q) {
+      var r = resolveOne(l, q, mode || 'all');
+      if (!r.ok) { keep.push(q); return; }
+      resolved++;
+      if (r.isNew) added++;
+    });
+    missingSave(code, keep);
+    return { resolved: resolved, added: added };
+  }
+
   function missingAdd(code, text) {
     text = String(text || '').trim();
     if (!text) return false;
@@ -959,19 +1208,36 @@
 
   function missingHTML(l) {
     var a = missingLoad(l.meta.code);
-    var body;
-    if (!a.length) {
-      body = '<p class="home-foot">No missing words yet. Search for a word you want — if it isn’t in the deck, you can add it here. Share the list and it can be added to the deck.</p>';
-    } else {
-      body = '<div class="misslist">';
+    var txt = lextextGet(l.meta.code);
+    var fileCount = txt ? parseLexiconText(txt).length : 0;
+    var body = '<p class="home-foot">The helper checks your deck, the built-in word bank and your own words file. ' +
+      'Matches become real cards (added to To Learn) and leave this list. It re-runs every time the app opens.</p>';
+
+    if (a.length) {
+      body += '<p class="home-foot">Tap a word — the bot looks it up and moves it into ⭐ Personal at the end of the deck.</p>';
+      body += '<div class="misslist">';
       a.forEach(function (w) {
-        body += '<div class="missrow"><span class="missword">' + esc(w) + '</span>' +
+        body += '<div class="missrow">' +
+          '<button class="missword missadd" data-act="missing-resolve" data-text="' + esc(w) + '">🤖 ' + esc(w) + '</button>' +
           '<button class="missdel" data-act="missing-del" data-text="' + esc(w) + '" aria-label="Remove">✕</button></div>';
       });
-      body += '</div>' +
-        '<button class="btn small" data-act="missing-copy">📋 Copy list</button>';
+      body += '</div>';
+    } else {
+      body += '<p class="home-foot">Nothing missing right now.</p>';
     }
-    return sectionHTML('missing', '＋', 'Missing words (' + a.length + ')', a.length ? a.length + ' to add' : 'empty', body);
+
+    body += '<div class="missactions">' +
+      (a.length ? '<button class="btn small primary" data-act="bot-run">🤖 Resolve ' + a.length + ' word(s)</button>' : '') +
+      '<button class="btn small" data-act="lex-import">📄 Words file</button>' +
+      (a.length ? '<button class="btn small" data-act="missing-copy">📋 Copy list</button>' : '') +
+      (txt ? '<button class="btn small" data-act="lex-clear">✕ File</button>' : '') +
+      '</div>';
+    body += '<p class="home-foot">Words file: ' +
+      (fileCount ? '<b>' + fileCount + ' entries</b> loaded — “word = translation”, tab or “front | back” per line' : 'none loaded — pick a .txt from this phone (kept and re-checked on every launch)') +
+      '</p>';
+    body += '<input type="file" id="lexfile" class="fileinput" accept=".txt,text/plain">';
+
+    return sectionHTML('missing', '＋', 'Missing words (' + a.length + ')', a.length ? a.length + ' to add' : 'words file', body);
   }
 
   /* ───────────────────────── rendering ───────────────────── */
@@ -1638,6 +1904,7 @@
       reader.onload = function () {
         try {
           var n = Store.importMerge(JSON.parse(reader.result));
+          state.langs.forEach(mergeExtras);
           alert('Imported ' + n + ' card(s) into To Learn decks.');
           render();
         } catch (err) {
@@ -1699,15 +1966,54 @@
         render();
         return;
       }
+      case 'bot-run': {
+        var lb = L();
+        if (!lb) return;
+        var rb = resolveMissing(lb);
+        showToast(rb.resolved
+          ? '🤖 Matched ' + rb.resolved + ' word(s) — ' + rb.added + ' new card(s) in To Learn'
+          : '🤖 Nothing matched yet — try adding more words to your file');
+        render();
+        return;
+      }
+      case 'lex-import': {
+        var fi = document.getElementById('lexfile');
+        if (fi) fi.click();
+        return;
+      }
+      case 'lex-clear': {
+        var lxc = L();
+        if (!lxc) return;
+        lextextClear(lxc.meta.code);
+        lxc._lex = null;
+        showToast('Words file removed');
+        render();
+        return;
+      }
       case 'missing-add': {
         var lm = L();
         if (!lm) return;
         var text = (el.getAttribute('data-text') || state.search || '').trim();
         if (!text) { showToast('Type a word first'); return; }
-        if (missingAdd(lm.meta.code, text)) {
-          showToast('＋ “' + text + '” saved to missing words');
-        } else {
+        if (!missingAdd(lm.meta.code, text)) {
           showToast('Already in missing words');
+          render();
+          return;
+        }
+        showToast('＋ “' + text + '” saved — tap it in Missing words to let the bot add it');
+        render();
+        return;
+      }
+      case 'missing-resolve': {
+        var lr2 = L();
+        if (!lr2) return;
+        var mw = el.getAttribute('data-text') || '';
+        var rOne = resolveOne(lr2, mw);
+        if (rOne.ok) {
+          showToast('✅ “' + mw + '” added to ⭐ Personal');
+          trySpeak(rOne.entry.front, lr2.meta.ttsLang || lr2.meta.code, lr2.meta.code, lr2.meta.name, false);
+        } else {
+          showToast('🤖 Not in the dictionary yet — load a 📄 Words file with it');
         }
         render();
         return;
@@ -1972,6 +2278,22 @@
       if (t && t.id === 'voicesel' && state.code) {
         setVoicePref(state.code, t.value);
         render();
+        return;
+      }
+      if (t && t.id === 'lexfile' && t.files && t.files[0] && state.code) {
+        var f = t.files[0];
+        var reader = new FileReader();
+        reader.onload = function () {
+          var l = L();
+          if (!l) return;
+          lextextSet(l.meta.code, String(reader.result || ''));
+          l._lex = null;
+          var r = resolveMissing(l, 'file');
+          showToast('📄 ' + f.name + ' loaded · ' + r.resolved + ' word(s) matched');
+          render();
+        };
+        reader.readAsText(f, 'utf-8');
+        t.value = '';
       }
     });
     document.addEventListener('input', function (ev) {

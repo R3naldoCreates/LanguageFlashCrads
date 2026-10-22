@@ -1,0 +1,192 @@
+# Built-in word bank (bot dictionary) — Finnish
+# Format: front | English | pos
+# Used only when a "missing word" is not already in the deck.
+# Lines starting with # are ignored.
+
+# ── everyday actions ──
+herätä | to wake up | verb
+nukahtaa | to fall asleep | verb
+nousta | to get up | verb
+istuutua | to sit down | verb
+pukeutua | to get dressed | verb
+riisua | to undress | verb
+pestä | to wash | verb
+siivota | to clean | verb
+lakaista | to sweep | verb
+kokata | to cook | verb
+paistaa | to fry / bake | verb
+keittää | to boil | verb
+tarjoilla | to serve | verb
+pyytää | to ask / request | verb
+tarjota | to offer | verb
+lainata | to lend / borrow | verb
+palauttaa | to return (something) | verb
+säästää | to save (money) | verb
+kuluttaa | to spend | verb
+ansaita | to earn | verb
+menettää | to lose | verb
+valita | to choose | verb
+päättää | to decide | verb
+yrittää | to try | verb
+onnistua | to succeed | verb
+luovuttaa | to give up | verb
+jatkaa | to continue | verb
+aloittaa | to start | verb
+lopettaa | to finish | verb
+tapahtua | to happen | verb
+muuttua | to change | verb
+kasvaa | to grow | verb
+vähentyä | to decrease | verb
+lisääntyä | to increase | verb
+rakentaa | to build | verb
+tuhota | to destroy | verb
+leikata | to cut | verb
+rikkoa | to break | verb
+korjata | to fix | verb
+maalata | to paint | verb
+piirtää | to draw | verb
+laulaa | to sing | verb
+tanssia | to dance | verb
+nauraa | to laugh | verb
+itkeä | to cry | verb
+huutaa | to shout | verb
+kuiskata | to whisper | verb
+haistaa | to smell | verb
+maistaa | to taste | verb
+koskettaa | to touch | verb
+työntää | to push | verb
+vetää | to pull | verb
+laskeutua | to descend | verb
+saapua | to arrive | verb
+palata | to return | verb
+seurata | to follow | verb
+pysähtyä | to stop | verb
+juosta | to run | verb
+uida | to swim | verb
+lentää | to fly | verb
+hypätä | to jump | verb
+pudota | to fall | verb
+avata | to open | verb
+sulkea | to close | verb
+lähettää | to send | verb
+vastaanottaa | to receive | verb
+vastata | to answer | verb
+kysyä | to ask | verb
+selittää | to explain | verb
+piilottaa | to hide | verb
+etsiä | to search | verb
+löytää | to find | verb
+ajatella | to think | verb
+uskoa | to believe | verb
+epäillä | to doubt | verb
+unohtaa | to forget | verb
+muistaa | to remember | verb
+ymmärtää | to understand | verb
+oppia | to learn | verb
+opettaa | to teach | verb
+opiskella | to study | verb
+työskennellä | to work | verb
+levätä | to rest | verb
+matkustaa | to travel | verb
+vierailla | to visit | verb
+kiittää | to thank | verb
+
+# ── people & city ──
+työkaveri | colleague | noun
+pomo | boss | noun
+asiakas | customer | noun
+turisti | tourist | noun
+ulkomaalainen | foreigner | noun
+kylä | village | noun
+kaupunginosa | neighbourhood | noun
+kulma | corner | noun
+apteekki | pharmacy | noun
+leipomo | bakery | noun
+posti | post office | noun
+pankki | bank | noun
+kirjasto | library | noun
+stadion | stadium | noun
+elokuvateatteri | cinema | noun
+teatteri | theatre | noun
+ravintola | restaurant | noun
+kahvila | café | noun
+hotelli | hotel | noun
+lentoasema | airport | noun
+rautatieasema | railway station | noun
+satama | harbour | noun
+silta | bridge | noun
+puutarha | garden | noun
+metsä | forest | noun
+vuori | mountain | noun
+joki | river | noun
+järvi | lake | noun
+meri | sea | noun
+ranta | shore | noun
+saari | island | noun
+aavikko | desert | noun
+pelto | field | noun
+maatila | farm | noun
+navetta | cowshed | noun
+
+# ── house & objects ──
+työkalu | tool | noun
+vasara | hammer | noun
+naula | nail | noun
+ruuvi | screw | noun
+lukko | lock | noun
+portaat | stairs | noun
+hissi | lift | noun
+autotalli | garage | noun
+piha | yard | noun
+katto | roof / ceiling | noun
+seinä | wall | noun
+lattia | floor | noun
+verho | curtain | noun
+matto | rug | noun
+tyyny | pillow | noun
+peitto | blanket | noun
+pyyhe | towel | noun
+saippua | soap | noun
+harja | brush | noun
+hammastahna | toothpaste | noun
+peili | mirror | noun
+kampa | comb | noun
+hajuvesi | perfume | noun
+lompakko | wallet | noun
+reppu | backpack | noun
+matkalaukku | suitcase | noun
+lippu | ticket | noun
+passi | passport | noun
+kartta | map | noun
+kompassi | compass | noun
+pesukone | washing machine | noun
+pölynimuri | vacuum cleaner | noun
+lamppu | lamp | noun
+pistorasia | socket | noun
+
+# ── food & kitchen ──
+jäätelö | ice cream | noun
+kakku | cake | noun
+keksi | biscuit | noun
+suklaa | chocolate | noun
+voi | butter | noun
+juusto | cheese | noun
+kananmuna | egg | noun
+kana | chicken | noun
+liha | meat | noun
+riisi | rice | noun
+pasta | pasta | noun
+keitto | soup | noun
+salaatti | salad | noun
+peruna | potato | noun
+sipuli | onion | noun
+valkosipuli | garlic | noun
+pippuri | pepper | noun
+oliiviöljy | olive oil | noun
+etikka | vinegar | noun
+haarukka | fork | noun
+veitsi | knife | noun
+lusikka | spoon | noun
+lasi | glass | noun
+muki | mug | noun
+lautasliina | napkin | noun

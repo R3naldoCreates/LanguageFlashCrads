@@ -1,0 +1,215 @@
+# Built-in word bank (bot dictionary) — Portuguese
+# Format: front | English | pos
+# Used only when a "missing word" is not already in the deck.
+# Lines starting with # are ignored.
+
+# ── everyday actions ──
+acordar | to wake up | verb
+adormecer | to fall asleep | verb
+levantar-se | to get up | verb
+sentar-se | to sit down | verb
+deitar-se | to lie down | verb
+vestir-se | to get dressed | verb
+despir-se | to undress | verb
+lavar | to wash | verb
+limpar | to clean | verb
+varrer | to sweep | verb
+cozinhar | to cook | verb
+assar | to roast / bake | verb
+fritar | to fry | verb
+ferver | to boil | verb
+servir | to serve | verb
+pedir | to ask for | verb
+oferecer | to offer | verb
+emprestar | to lend | verb
+devolver | to return (something) | verb
+guardar | to keep / put away | verb
+gastar | to spend | verb
+poupar | to save (money) | verb
+ganhar | to win / earn | verb
+perder | to lose | verb
+escolher | to choose | verb
+decidir | to decide | verb
+tentar | to try | verb
+conseguir | to manage / succeed | verb
+desistir | to give up | verb
+continuar | to continue | verb
+começar | to begin | verb
+acabar | to finish | verb
+terminar | to end | verb
+esperar | to wait / hope | verb
+acontecer | to happen | verb
+parecer | to seem | verb
+mudar | to change | verb
+crescer | to grow | verb
+diminuir | to decrease | verb
+aumentar | to increase | verb
+construir | to build | verb
+destruir | to destroy | verb
+cortar | to cut | verb
+quebrar | to break | verb
+consertar | to repair | verb
+pintar | to paint | verb
+desenhar | to draw | verb
+cantar | to sing | verb
+dançar | to dance | verb
+rir | to laugh | verb
+chorar | to cry | verb
+gritar | to shout | verb
+sussurrar | to whisper | verb
+cheirar | to smell | verb
+provar | to taste / try | verb
+segurar | to hold | verb
+soltar | to let go | verb
+empurrar | to push | verb
+puxar | to pull | verb
+subir | to go up | verb
+descer | to go down | verb
+entrar | to enter | verb
+sair | to leave / go out | verb
+chegar | to arrive | verb
+partir | to depart | verb
+voltar | to return | verb
+seguir | to follow | verb
+parar | to stop | verb
+correr | to run | verb
+nadar | to swim | verb
+voar | to fly | verb
+saltar | to jump | verb
+cair | to fall | verb
+abrir | to open | verb
+fechar | to close | verb
+ligar | to turn on / call | verb
+desligar | to turn off | verb
+enviar | to send | verb
+responder | to answer | verb
+perguntar | to ask | verb
+explicar | to explain | verb
+mostrar | to show | verb
+esconder | to hide | verb
+procurar | to look for | verb
+encontrar | to find | verb
+pensar | to think | verb
+acreditar | to believe | verb
+duvidar | to doubt | verb
+esquecer | to forget | verb
+lembrar | to remember | verb
+entender | to understand | verb
+aprender | to learn | verb
+ensinar | to teach | verb
+estudar | to study | verb
+trabalhar | to work | verb
+descansar | to rest | verb
+viajar | to travel | verb
+visitar | to visit | verb
+convidar | to invite | verb
+agradecer | to thank | verb
+desculpar | to excuse | verb
+cumprimentar | to greet | verb
+
+# ── people & city ──
+vizinho | neighbour | noun
+colega | colleague | noun
+patrão | boss | noun
+empregado | employee | noun
+cliente | customer | noun
+turista | tourist | noun
+estrangeiro | foreigner | noun
+aldeia | village | noun
+bairro | neighbourhood | noun
+esquina | corner | noun
+praça | square | noun
+mercado | market | noun
+farmácia | pharmacy | noun
+padaria | bakery | noun
+talho | butcher's shop | noun
+correios | post office | noun
+biblioteca | library | noun
+estádio | stadium | noun
+cinema | cinema | noun
+teatro | theatre | noun
+restaurante | restaurant | noun
+aeroporto | airport | noun
+estação | station | noun
+porto | harbour / port | noun
+ponte | bridge | noun
+parque | park | noun
+jardim | garden | noun
+floresta | forest | noun
+montanha | mountain | noun
+rio | river | noun
+lago | lake | noun
+praia | beach | noun
+ilha | island | noun
+deserto | desert | noun
+campo | field / countryside | noun
+fazenda | farm | noun
+celeiro | barn | noun
+
+# ── house & objects ──
+ferramenta | tool | noun
+martelo | hammer | noun
+prego | nail | noun
+parafuso | screw | noun
+fechadura | lock | noun
+escada | stairs / ladder | noun
+elevador | lift | noun
+garagem | garage | noun
+quintal | yard | noun
+telhado | roof | noun
+parede | wall | noun
+chão | floor | noun
+teto | ceiling | noun
+móveis | furniture | noun
+cortina | curtain | noun
+tapete | rug | noun
+almofada | cushion | noun
+manta | blanket | noun
+toalha | towel | noun
+sabão | soap | noun
+escova | brush | noun
+pasta de dentes | toothpaste | noun
+espelho | mirror | noun
+pente | comb | noun
+perfume | perfume | noun
+carteira | wallet | noun
+mochila | backpack | noun
+mala | suitcase | noun
+bilhete | ticket | noun
+passaporte | passport | noun
+mapa | map | noun
+bússola | compass | noun
+telemóvel | mobile phone | noun
+frigorífico | fridge | noun
+máquina de lavar | washing machine | noun
+aspirador | vacuum cleaner | noun
+vassoura | broom | noun
+lâmpada | light bulb | noun
+tomada | socket | noun
+
+# ── food & kitchen ──
+gelado | ice cream | noun
+bolo | cake | noun
+bolacha | biscuit | noun
+chocolate | chocolate | noun
+manteiga | butter | noun
+queijo | cheese | noun
+ovo | egg | noun
+frango | chicken | noun
+carne | meat | noun
+arroz | rice | noun
+massa | pasta | noun
+sopa | soup | noun
+salada | salad | noun
+batata | potato | noun
+cebola | onion | noun
+alho | garlic | noun
+pimenta | pepper | noun
+azeite | olive oil | noun
+vinagre | vinegar | noun
+garfo | fork | noun
+faca | knife | noun
+colher | spoon | noun
+copo | glass | noun
+caneca | mug | noun
+guardanapo | napkin | noun

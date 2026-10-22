@@ -933,3 +933,25 @@ html, body {
 .searchrow .searchinput { flex: 1 1 auto; min-width: 0; }
 .missbtn { flex: 0 0 auto; white-space: nowrap; }
 .missbtn[disabled] { opacity: .4; cursor: default; }
+
+.missactions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.missactions .btn { flex: 1 1 auto; }
+.fileinput { display: none; }
+
+.missword.missadd {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--border);
+  padding: 2px 0;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.missword.missadd:active { opacity: .55; }

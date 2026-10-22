@@ -1,7 +1,7 @@
 ﻿/* Language Flash Cards — offline cache (service worker)
    Strategy: network-first, cache fallback. Fresh files whenever you are
    online; the cached copy is used only when offline. */
-var CACHE = 'lfc-v7';
+var CACHE = 'lfc-v8';
 var ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,9 @@ var ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './data/portuguese.txt',
-  './data/finnish.txt'
+  './data/finnish.txt',
+  './data/lexicon-pt.txt',
+  './data/lexicon-fi.txt'
 ];
 
 self.addEventListener('install', function (e) {

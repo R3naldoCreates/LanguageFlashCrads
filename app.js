@@ -1210,6 +1210,73 @@
     return '';
   }
 
+  function fetchJSON(url) {
+    return fetch(url, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    });
+  }
+
+  function cleanTranslation(t) {
+    t = decodeEntities(String(t || '')).replace(/[.,;:!?¡¿]+$/g, '').trim();
+    if (!t || t.length > 40) return '';
+    if (/[,;]/.test(t)) return '';
+    if (/^[A-ZÄÖÅ]/.test(t) && !/^[A-ZÄÖÅ]{2}/.test(t)) t = t.charAt(0).toLowerCase() + t.slice(1);
+    return t;
+  }
+
+  function gtxTranslate(q, from, to) {
+    var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t' +
+      '&sl=' + encodeURIComponent(from) + '&tl=' + encodeURIComponent(to) + '&q=' + encodeURIComponent(q);
+    return fetchJSON(url).then(function (data) {
+      if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
+      var out = '';
+      data[0].forEach(function (seg) { if (seg && seg[0]) out += seg[0]; });
+      return cleanTranslation(out) || null;
+    });
+  }
+
+  function myMemoryTranslate(q, from, to) {
+    var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(q) +
+      '&langpair=' + encodeURIComponent(from + '|' + to);
+    return fetchJSON(url).then(function (j) {
+      var cands = [];
+      var matches = (j && Array.isArray(j.matches)) ? j.matches : [];
+      matches.forEach(function (m) {
+        if (m && m.translation) cands.push({ text: m.translation, q: typeof m.quality === 'number' ? m.quality : 0 });
+      });
+      if (!matches.length && j && j.responseData && j.responseData.translatedText) {
+        cands.push({ text: j.responseData.translatedText, q: 50 });
+      }
+      var best = null, bestScore = -1, seen = {};
+      cands.forEach(function (c) {
+        var t = cleanTranslation(c.text);
+        if (!t) return;
+        var nt = normSearch(t);
+        if (!nt || nt === normSearch(q) || seen[nt]) return;
+        seen[nt] = true;
+        var score = c.q * 100 - t.length;
+        if (score > bestScore) { bestScore = score; best = t; }
+      });
+      return best;
+    });
+  }
+
+  function wikiTranslate(q, from, to) {
+    if (from !== 'en') return Promise.resolve(null);
+    var url = 'https://en.wiktionary.org/w/api.php?action=parse&page=' + encodeURIComponent(q) +
+      '&prop=wikitext&format=json&origin=*&redirects=1';
+    return fetchJSON(url).then(function (j) {
+      var wt = j && j.parse && j.parse.wikitext && j.parse.wikitext['*'];
+      if (!wt) return null;
+      var re = /\{\{t[^|}]*\|([a-z-]+)\|([^}|]+)/g, m, out = null;
+      while ((m = re.exec(wt))) {
+        if (m[1].toLowerCase() === to) { out = m[2]; break; }
+      }
+      return out ? (cleanTranslation(out) || null) : null;
+    });
+  }
+
   function onlineTranslate(l, word) {
     var q = String(word || '').trim();
     var target = l.meta.code;
@@ -1217,41 +1284,31 @@
     var ascii = !/[^\x00-\x7F]/.test(q);
     var dirs = ascii ? [['en', target], [target, 'en']] : [[target, 'en'], ['en', target]];
 
-    function attempt(idx) {
-      if (idx >= dirs.length) return Promise.resolve(null);
-      var from = dirs[idx][0], to = dirs[idx][1];
-      var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(q) +
-        '&langpair=' + encodeURIComponent(from + '|' + to);
-      return fetch(url, { cache: 'no-store' }).then(function (r) {
-        if (!r.ok) throw new Error('http ' + r.status);
-        return r.json();
-      }).then(function (j) {
-        var cands = [];
-        var matches = (j && Array.isArray(j.matches)) ? j.matches : [];
-        matches.forEach(function (m) {
-          if (m && m.translation) cands.push({ text: m.translation, q: typeof m.quality === 'number' ? m.quality : 0 });
-        });
-        if (!matches.length && j && j.responseData && j.responseData.translatedText) {
-          cands.push({ text: j.responseData.translatedText, q: 50 });
-        }
-        var best = null, bestScore = -1, seen = {};
-        cands.forEach(function (c) {
-          var t = decodeEntities(String(c.text)).replace(/[.,;:!?¡¿]+$/g, '').trim();
-          if (!t || t.length > 40) return;
-          if (/[,;]/.test(t)) return;
-          var nt = normSearch(t);
-          if (!nt || nt === normSearch(q) || seen[nt]) return;
-          seen[nt] = true;
-          if (/^[A-ZÄÖÅ]/.test(t) && !/^[A-ZÄÖÅ]{2}/.test(t)) t = t.charAt(0).toLowerCase() + t.slice(1);
-          var score = c.q * 100 - t.length;
-          if (score > bestScore) { bestScore = score; best = t; }
-        });
-        if (best) return { from: from, to: to, text: best };
-        return attempt(idx + 1);
-      }).catch(function () { return attempt(idx + 1); });
+    var combos = [];
+    dirs.forEach(function (d) {
+      combos.push({ src: 'gtx', from: d[0], to: d[1] });
+      combos.push({ src: 'mm', from: d[0], to: d[1] });
+      combos.push({ src: 'wiki', from: d[0], to: d[1] });
+    });
+
+    var okCount = 0;
+
+    function step(i) {
+      if (i >= combos.length) return Promise.resolve(null);
+      var c = combos[i];
+      var pr = c.src === 'gtx' ? gtxTranslate(q, c.from, c.to)
+        : c.src === 'mm' ? myMemoryTranslate(q, c.from, c.to)
+          : wikiTranslate(q, c.from, c.to);
+      return pr.then(function (text) {
+        if (c.src !== 'wiki' || c.from === 'en') okCount++;
+        if (!text) return step(i + 1);
+        if (normSearch(text) === normSearch(q)) return step(i + 1);
+        return { from: c.from, to: c.to, text: text };
+      }, function () { return step(i + 1); });
     }
 
-    return attempt(0).then(function (res) {
+    return step(0).then(function (res) {
+      if (!res && !okCount) throw new Error('offline');
       if (!res) return null;
       var front = res.from === 'en' ? res.text : q;
       var back = res.from === 'en' ? q : res.text;
@@ -1268,6 +1325,47 @@
     if (exists) return;
     txt = (txt ? txt.replace(/\s+$/, '') + '\n' : '') + front + ' = ' + back;
     lextextSet(code, txt);
+  }
+
+  /* the app's own dictionary file: every learned word pair */
+  function dictEntries(l) {
+    var out = [], seen = {};
+    function push(front, back) {
+      var k = normSearch(front) + '§' + normSearch(back);
+      if (!k || seen[k]) return;
+      seen[k] = true;
+      out.push({ front: front, back: back });
+    }
+    parseLexiconText(lextextGet(l.meta.code)).forEach(function (e) { push(e.front, e.back); });
+    extraLoad(l.meta.code).forEach(function (e) { push(e.front, e.back); });
+    return out;
+  }
+
+  function dictFileText(l) {
+    var rows = dictEntries(l);
+    var head = '# My ' + l.meta.name + ' dictionary — created by Language Flash Cards\n' +
+      '# saved ' + new Date().toISOString().slice(0, 10) + ' · ' + rows.length + ' words\n' +
+      '# format: word = english\n\n';
+    return head + rows.map(function (r) { return r.front + ' = ' + r.back; }).join('\n') + '\n';
+  }
+
+  function saveDictFile(l) {
+    var txt = dictFileText(l);
+    try {
+      var blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'my-dictionary-' + l.meta.code + '.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        URL.revokeObjectURL(a.href);
+        if (a.parentNode) a.parentNode.removeChild(a);
+      }, 1200);
+      showToast('💾 Dictionary file saved');
+    } catch (e) {
+      showToast('Could not save the file on this device');
+    }
   }
 
   function onlineResolve(l, word) {
@@ -1333,13 +1431,14 @@
 
     body += '<div class="missactions">' +
       (a.length ? '<button class="btn small primary" data-act="bot-run">🤖 Resolve ' + a.length + ' word(s)</button>' : '') +
-      '<button class="btn small" data-act="lex-import">📄 Words file</button>' +
+      '<button class="btn small" data-act="lex-import">📄 Load dictionary</button>' +
+      '<button class="btn small" data-act="dict-save">💾 Save dictionary</button>' +
       (a.length ? '<button class="btn small" data-act="missing-copy">📋 Copy list</button>' : '') +
       (txt ? '<button class="btn small" data-act="lex-clear">✕ File</button>' : '') +
       '</div>';
-    body += '<p class="home-foot">Words file: ' +
-      (fileCount ? '<b>' + fileCount + ' entries</b> loaded — “word = translation”, tab or “front | back” per line' : 'none loaded — pick a .txt from this phone (kept and re-checked on every launch)') +
-      '</p>';
+    body += '<p class="home-foot">📖 My dictionary: <b>' + dictEntries(l).length + ' word(s)</b> saved in this app' +
+      (fileCount ? ' (' + fileCount + ' from your loaded file)' : '') +
+      ' — “word = translation”, tab or “front | back” per line. “Save dictionary” writes my-dictionary-' + l.meta.code + '.txt to your phone.</p>';
     body += '<input type="file" id="lexfile" class="fileinput" accept=".txt,text/plain">';
 
     return sectionHTML('missing', '＋', 'Missing words (' + a.length + ')', a.length ? a.length + ' to add' : 'words file', body);
@@ -2091,6 +2190,12 @@
             : '🤖 No online matches — kept in Missing words');
           render();
         });
+        return;
+      }
+      case 'dict-save': {
+        var lds = L();
+        if (!lds) return;
+        saveDictFile(lds);
         return;
       }
       case 'lex-import': {

@@ -1,7 +1,7 @@
-/* Language Flash Cards — offline cache (service worker)
+﻿/* Language Flash Cards — offline cache (service worker)
    Strategy: network-first, cache fallback. Fresh files whenever you are
    online; the cached copy is used only when offline. */
-var CACHE = 'lfc-v5';
+var CACHE = 'lfc-v6';
 var ASSETS = [
   './',
   './index.html',

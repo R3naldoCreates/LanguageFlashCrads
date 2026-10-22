@@ -165,7 +165,8 @@
       return {
         app: 'language-flash-cards', version: 2, exported: new Date().toISOString(),
         tolearn: out, srs: srs, acc: acc,
-        daily: dailyLoad(), goal: getGoal()
+        daily: dailyLoad(), goal: getGoal(),
+        missing: missingExport()
       };
     },
     importMerge: function (data) {
@@ -204,6 +205,13 @@
         dailySave(map);
       }
       if (data.goal > 0) setGoal(data.goal);
+      if (data.missing && typeof data.missing === 'object') {
+        Object.keys(data.missing).forEach(function (code) {
+          (data.missing[code] || []).forEach(function (w) {
+            if (typeof w === 'string') missingAdd(code, w);
+          });
+        });
+      }
       return changed;
     }
   };
@@ -412,6 +420,7 @@
     code: null,
     posFilter: 'all',
     shuffle: true,
+    search: '',
     basic: null,
     test: null,
     testCfg: { len: 10, src: 'all', typing: false }
@@ -554,6 +563,20 @@
       t.classList.remove('show');
       setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 350);
     }, 3000);
+  }
+
+  function copyFallback(txt) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('📋 Copied to clipboard');
+    } catch (e) { showToast('Copy failed — long-press to select'); }
   }
 
   function getSpeakPref() {
@@ -842,6 +865,113 @@
     return h;
   }
 
+  /* ───────────────── search + missing words ─────────────────── */
+
+  function normSearch(s) {
+    var t = String(s || '').toLowerCase().trim();
+    if (t.normalize) t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return t;
+  }
+
+  function searchMatches(l, q) {
+    var nq = normSearch(q);
+    if (!nq) return [];
+    var out = [];
+    for (var i = 0; i < l.entries.length && out.length < 80; i++) {
+      var e = l.entries[i];
+      if (normSearch(e.front).indexOf(nq) >= 0 || normSearch(e.back).indexOf(nq) >= 0) out.push(e);
+    }
+    return out;
+  }
+
+  function searchResultsHTML(l) {
+    var q = state.search || '';
+    if (!q.trim()) {
+      return '<p class="home-foot">Type a word in ' + esc(l.meta.frontLabel) + ' or ' + esc(l.meta.backLabel) + ' — accents optional.</p>';
+    }
+    var res = searchMatches(l, q);
+    if (!res.length) {
+      return '<div class="empty small"><span class="big-ico">🔍</span>No “' + esc(q.trim()) + '” in this deck.</div>' +
+        '<button class="btn primary block" data-act="missing-add" data-text="' + esc(q.trim()) + '">＋ Add “' + esc(q.trim()) + '” to missing words</button>';
+    }
+    var h = '<div class="search-actions">' +
+      '<button class="btn small" data-act="search-tol">⭐ Add all ' + res.length + ' to To Learn</button>' +
+      '<button class="btn small primary" data-act="search-study">▶ Study these ' + res.length + '</button>' +
+      '</div><div class="searchlist">';
+    res.forEach(function (e) {
+      var on = Store.has(l.meta.code, e.id);
+      h += '<div class="srow">' +
+        '<div class="sinfo"><div class="sword">' + esc(e.front) + '</div>' +
+        '<div class="smean">' + esc(e.back) + '</div></div>' +
+        '<button class="sstar' + (on ? ' on' : '') + '" data-act="star" data-id="' + esc(e.id) + '" aria-label="Toggle To Learn">' + (on ? '★' : '☆') + '</button>' +
+        '</div>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  function searchHTML(l) {
+    var q = state.search || '';
+    return '<div class="searchbox-wrap">' +
+      '<input id="searchbox" class="searchinput" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" ' +
+      'placeholder="Search ' + esc(l.meta.frontLabel) + ' or ' + esc(l.meta.backLabel) + '…" value="' + esc(q) + '" aria-label="Search words">' +
+      '</div><div id="searchres">' + searchResultsHTML(l) + '</div>';
+  }
+
+  function missingLoad(code) {
+    try {
+      var a = JSON.parse(localStorage.getItem(PREFIX + 'missing:' + code) || '[]');
+      return Array.isArray(a) ? a : [];
+    } catch (e) { return []; }
+  }
+
+  function missingSave(code, arr) {
+    try { localStorage.setItem(PREFIX + 'missing:' + code, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  function missingExport() {
+    var out = {};
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf(PREFIX + 'missing:') === 0) {
+        try { out[k.slice((PREFIX + 'missing:').length)] = JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) {}
+      }
+    }
+    return out;
+  }
+
+  function missingAdd(code, text) {
+    text = String(text || '').trim();
+    if (!text) return false;
+    var a = missingLoad(code);
+    for (var i = 0; i < a.length; i++) if (normSearch(a[i]) === normSearch(text)) return false;
+    a.push(text);
+    missingSave(code, a);
+    return true;
+  }
+
+  function missingRemove(code, text) {
+    var a = missingLoad(code).filter(function (x) { return x !== text; });
+    missingSave(code, a);
+  }
+
+  function missingHTML(l) {
+    var a = missingLoad(l.meta.code);
+    var body;
+    if (!a.length) {
+      body = '<p class="home-foot">No missing words yet. Search for a word you want — if it isn’t in the deck, you can add it here. Share the list and it can be added to the deck.</p>';
+    } else {
+      body = '<div class="misslist">';
+      a.forEach(function (w) {
+        body += '<div class="missrow"><span class="missword">' + esc(w) + '</span>' +
+          '<button class="missdel" data-act="missing-del" data-text="' + esc(w) + '" aria-label="Remove">✕</button></div>';
+      });
+      body += '</div>' +
+        '<button class="btn small" data-act="missing-copy">📋 Copy list</button>';
+    }
+    return sectionHTML('missing', '＋', 'Missing words (' + a.length + ')', a.length ? a.length + ' to add' : 'empty', body);
+  }
+
   /* ───────────────────────── rendering ───────────────────── */
 
   var app = null;
@@ -1010,6 +1140,7 @@
     var st = streakInfo();
     var goal = getGoal();
     h += setupHTML(l);
+    h += sectionHTML('search', '🔍', 'Search words', state.search ? '“' + state.search + '”' : 'find & star', searchHTML(l));
     h += '<div class="goalbar">' +
       (st.current > 0 ? '<span class="streak">🔥 ' + st.current + '</span>' : '') +
       '<span class="today">Today: ' + todayStudied() + ' / ' + goal + (st.doneToday ? ' ✓' : '') + '</span>' +
@@ -1046,6 +1177,7 @@
       (state.posFilter === 'all' ? '' : ' · ' + esc(posLabel(l, state.posFilter)) + ' only') +
       ' · ' + pool.length + ' card(s) available' +
       '</p>';
+    h += missingHTML(l);
     return h;
   }
 
@@ -1540,8 +1672,66 @@
       case 'go-lang':
         state.code = el.getAttribute('data-code');
         state.posFilter = 'all';
+        state.search = '';
         nav('hub');
         return;
+      case 'search-study': {
+        var ls = L();
+        if (!ls) return;
+        var sres = searchMatches(ls, state.search || '');
+        if (!sres.length) return;
+        state.basic = { deck: sres, i: 0, flipped: false };
+        nav('basic');
+        speakCurrent();
+        return;
+      }
+      case 'search-tol': {
+        var lt = L();
+        if (!lt) return;
+        var tr = searchMatches(lt, state.search || '');
+        var added = 0;
+        tr.forEach(function (e) {
+          if (!Store.has(lt.meta.code, e.id)) { Store.add(lt.meta.code, e.id); added++; }
+        });
+        showToast(added ? '⭐ Added ' + added + ' word(s) to To Learn' : 'Already all in To Learn');
+        render();
+        return;
+      }
+      case 'missing-add': {
+        var lm = L();
+        if (!lm) return;
+        var text = el.getAttribute('data-text') || state.search || '';
+        if (missingAdd(lm.meta.code, text)) {
+          showToast('＋ “' + text + '” saved to missing words');
+        } else {
+          showToast('Already in missing words');
+        }
+        state.search = '';
+        render();
+        return;
+      }
+      case 'missing-del': {
+        var ld = L();
+        if (!ld) return;
+        missingRemove(ld.meta.code, el.getAttribute('data-text'));
+        render();
+        return;
+      }
+      case 'missing-copy': {
+        var lc = L();
+        if (!lc) return;
+        var words = missingLoad(lc.meta.code);
+        if (!words.length) return;
+        var txt = words.join('\n');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function () {
+            showToast('📋 Copied ' + words.length + ' missing word(s)');
+          }, function () { copyFallback(txt); });
+        } else {
+          copyFallback(txt);
+        }
+        return;
+      }
       case 'filter':
         state.posFilter = el.getAttribute('data-pos');
         render(); return;
@@ -1780,6 +1970,15 @@
       if (t && t.id === 'voicesel' && state.code) {
         setVoicePref(state.code, t.value);
         render();
+      }
+    });
+    document.addEventListener('input', function (ev) {
+      var t = ev.target;
+      if (t && t.id === 'searchbox') {
+        state.search = t.value;
+        var res = document.getElementById('searchres');
+        var l = L();
+        if (res && l) res.innerHTML = searchResultsHTML(l);
       }
     });
     document.addEventListener('touchstart', onTouchStart, { passive: true });

@@ -837,3 +837,89 @@ html, body {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ── search + missing words ────────────────────────────────── */
+
+.searchinput {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+.searchinput:focus { border-color: var(--accent); }
+.searchbox-wrap { margin-bottom: 12px; }
+
+.search-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.search-actions .btn { flex: 1 1 auto; }
+
+.searchlist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.srow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+}
+.sinfo { min-width: 0; flex: 1; }
+.sword { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
+.smean { color: var(--text-dim); font-size: 14px; overflow-wrap: anywhere; }
+.sstar {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+}
+.sstar.on { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+.misslist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.missrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+}
+.missword { flex: 1; font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+.missdel {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 15px;
+  cursor: pointer;
+}
+.empty.small { padding: 20px 12px; font-size: 14px; }
+.empty.small .big-ico { font-size: 26px; margin-bottom: 6px; }

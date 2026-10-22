@@ -466,7 +466,16 @@
   }
 
   function featVal(e, key) {
-    for (var i = 0; i < e.features.length; i++) if (e.features[i].key === key) return e.features[i].value;
+    var f = e && e.features;
+    if (!f) return '';
+    if (Array.isArray(f)) {
+      for (var i = 0; i < f.length; i++) if (f[i] && f[i].key === key) return f[i].value;
+      return '';
+    }
+    if (typeof f === 'object') {
+      var v = f[key];
+      return v == null ? '' : String(v);
+    }
     return '';
   }
 
@@ -685,9 +694,10 @@
         }).catch(function () { l.lexicon = []; });
       }));
     }).then(function () {
-      /* bot: pull in words from the phone word file on every launch */
+      /* launch bot: pull in words from the phone word file, then repair old saves */
       state.langs.forEach(function (l) {
         try { resolveMissing(l, 'file'); } catch (e) {}
+        try { sanitizeLang(l); } catch (e) {}
       });
       state.loaded = true;
     }).catch(function (err) {
@@ -825,7 +835,16 @@
   function startPick() {
     var l = L();
     var pool = pickPool(l);
-    if (!pool.length) { showToast('Nothing matches — try another topic or range'); return; }
+    if (!pool.length) {
+      var p0 = getPick(l.meta.code);
+      if (p0.themes.length || p0.range !== 'all') {
+        setPick(l.meta.code, 'themes', []);
+        setPick(l.meta.code, 'range', 'all');
+        showToast('That selection had no cards — using all words');
+        pool = l.entries.slice();
+      }
+    }
+    if (!pool.length) { showToast('This deck has no cards yet'); return; }
     var p = getPick(l.meta.code);
     var deck = state.shuffle ? shuffleArr(pool) : pool.slice();
     if (p.count > 0) deck = deck.slice(0, p.count);
@@ -1040,12 +1059,91 @@
       seen[e.id] = true;
       l.entries.push({
         id: e.id, front: e.front, back: e.back, pos: e.pos || '',
-        features: e.features || { theme: 'geral' },
+        features: normalizeFeatures(e.features),
         example: e.example || '', exampleTrans: e.exampleTrans || '',
         file: 'bot', line: 0
       });
     });
     l._lex = null;
+  }
+
+  function normalizeFeatures(f) {
+    if (Array.isArray(f) && f.length) return f;
+    if (f && typeof f === 'object') {
+      var arr = [];
+      Object.keys(f).forEach(function (k) {
+        if (f[k]) arr.push({ key: k, value: String(f[k]) });
+      });
+      if (arr.length) return arr;
+    }
+    return [{ key: 'theme', value: 'geral' }];
+  }
+
+  function personalCount(l) {
+    var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
+    return Math.max(0, l.entries.length - base);
+  }
+
+  /* repair saves from older versions so nothing breaks the flow */
+  function sanitizeLang(l) {
+    var code = l.meta.code;
+
+    /* legacy personal cards: object features and/or colliding deck id */
+    var extras = extraLoad(code);
+    var changed = false;
+    var deckIds = {};
+    for (var i = 0; i < l.baseCount && i < l.entries.length; i++) deckIds[l.entries[i].id] = 1;
+    extras.forEach(function (e) {
+      if (!e || !e.front || !e.back) return;
+      if (e.features && !Array.isArray(e.features)) { e.features = normalizeFeatures(e.features); changed = true; }
+      if (!e.features || !e.features.length) { e.features = [{ key: 'theme', value: 'geral' }]; changed = true; }
+      if (deckIds[e.id]) {
+        e.id = hashId(code + '|personal|' + e.front + '|' + (e.pos || '?'));
+        changed = true;
+      }
+    });
+    if (changed) extraSave(code, extras);
+
+    /* drop To Learn / SRS ids that no longer exist (old versions, cleared decks) */
+    var ids = {};
+    l.entries.forEach(function (e) { ids[e.id] = 1; });
+    var s = Store.get(code), sc = false;
+    s.forEach(function (id) { if (!ids[id]) { s.delete(id); sc = true; } });
+    if (sc) Store.save(code, s);
+    var m = srsLoad(code), mc = false;
+    Object.keys(m).forEach(function (id) { if (!ids[id]) { delete m[id]; mc = true; } });
+    if (mc) srsSave(code, m);
+
+    /* a saved selection must always point at something that exists */
+    var p = getPick(code);
+    var ranges = rangeList(l);
+    var okRange = p.range === 'all';
+    ranges.forEach(function (r) { if (r.id === p.range) okRange = true; });
+    if (!okRange) setPick(code, 'range', 'all');
+    if (p.themes.length) {
+      var themes = themeList(l);
+      var cleaned = p.themes.filter(function (t) { return themes.indexOf(t) >= 0; });
+      if (cleaned.length !== p.themes.length) setPick(code, 'themes', cleaned);
+    }
+  }
+
+  function clearPersonal(l) {
+    var code = l.meta.code;
+    var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
+    var ids = {};
+    l.entries.slice(base).forEach(function (e) { ids[e.id] = 1; });
+    extraLoad(code).forEach(function (e) { if (e && e.id) ids[e.id] = 1; });
+    extraSave(code, []);
+    l.entries = l.entries.slice(0, base);
+    l._lex = null;
+    var s = Store.get(code);
+    Object.keys(ids).forEach(function (id) { s.delete(id); });
+    Store.save(code, s);
+    var m = srsLoad(code);
+    Object.keys(ids).forEach(function (id) { delete m[id]; });
+    srsSave(code, m);
+    var p = getPick(code);
+    if (p.range === 'p') setPick(code, 'range', 'all');
   }
 
   function lextextGet(code) {
@@ -1160,7 +1258,7 @@
     for (var i = 0; i < l.entries.length; i++) if (l.entries[i].id === id) return { id: id, isNew: false, entry: l.entries[i] };
     var e = {
       id: id, front: src.front, back: src.back, pos: pos,
-      features: (src.features && src.features.theme) ? src.features : { theme: 'geral' },
+      features: normalizeFeatures(src.features),
       example: '', exampleTrans: '',
       file: 'bot', line: 0
     };
@@ -1438,6 +1536,7 @@
       '<button class="btn small" data-act="dict-save">💾 Save dictionary</button>' +
       (a.length ? '<button class="btn small" data-act="missing-copy">📋 Copy list</button>' : '') +
       (txt ? '<button class="btn small" data-act="lex-clear">✕ File</button>' : '') +
+      (personalCount(l) ? '<button class="btn small" data-act="clear-personal">🧹 Clear personal</button>' : '') +
       '</div>';
     body += '<p class="home-foot">📖 My dictionary: <b>' + dictEntries(l).length + ' word(s)</b> saved in this app' +
       (fileCount ? ' (' + fileCount + ' from your loaded file)' : '') +
@@ -1639,7 +1738,11 @@
     var pool = pickPool(l);
     var due = dueEntries(l);
     var dueCount = due.due.length;
+    var pc = personalCount(l);
     h += '<div class="mode-grid">';
+    if (pc > 0) {
+      h += '<button class="mode-btn personal" data-act="start-personal"><span class="ico">⭐</span><span><span class="t">Personal (' + pc + ')</span><div class="d">Your own words — tap a missing word to add more</div></span></button>';
+    }
     if (dueCount > 0) {
       h += '<button class="mode-btn due" data-act="start-due"><span class="ico">⏰</span><span><span class="t">Due today (' + dueCount + ')</span><div class="d">Smart review — hardest first, then new words</div></span></button>';
     }
@@ -1707,8 +1810,8 @@
     h += '<div class="back-meaning">' + esc(rev ? e.front : e.back) + '</div>';
 
     var chips = '', forms = '';
-    e.features.forEach(function (f) {
-      if (!f.value) return;
+    (Array.isArray(e.features) ? e.features : []).forEach(function (f) {
+      if (!f.value || f.key === 'theme') return;
       if (LONG_KEYS[f.key] || f.value.length > 22) {
         var items = f.value.split(',').map(function (s) { return '<li>' + esc(s.trim()) + '</li>'; }).join('');
         forms += '<div class="forms"><div class="forms-title">' + esc(featLabel(l, f.key)) + '</div><ul>' + items + '</ul></div>';
@@ -1886,7 +1989,7 @@
       h += '<div class="section-label">What you got wrong</div><div class="wronglist">';
       r.wrong.forEach(function (e) {
         var l = L();
-        var g = e.features.filter(function (f) { return f.key !== 'note' && f.value && f.value.length <= 26; })
+        var g = (Array.isArray(e.features) ? e.features : []).filter(function (f) { return f.key !== 'note' && f.key !== 'theme' && f.value && f.value.length <= 26; })
           .map(function (f) { return esc(featLabel(l, f.key)) + ': ' + esc(f.value); }).join(' · ');
         h += '<div class="wrongitem"><div class="w">' + esc(e.front) + '</div>' +
           '<div class="m">' + esc(e.back) + '</div>' +
@@ -1950,8 +2053,7 @@
     nav('basic');
   }
 
-  function startTol() {
-    var l = L();
+  function startTol() {    var l = L();
     var p = getPick(l.meta.code);
     var pool = tolearnEntries(l);
     if (!pool.length) pool = pickPool(l);
@@ -1959,6 +2061,15 @@
     if (p.count > 0) pool = pool.slice(0, p.count);
     state.tol = { deck: pool, i: 0, flipped: false, title: '⭐ ' + pickSummary(l) };
     nav('tol');
+  }
+
+  function startPersonal() {
+    var l = L();
+    var pool = poolFor(l, [], 'p');
+    if (!pool.length) { showToast('No ⭐ Personal words yet — tap a missing word to add one'); return; }
+    if (state.shuffle) pool = shuffleArr(pool);
+    state.basic = { deck: pool, i: 0, flipped: false, title: '⭐ Personal' };
+    nav('basic');
   }
 
   function startDue() {
@@ -2201,6 +2312,16 @@
         saveDictFile(lds);
         return;
       }
+      case 'clear-personal': {
+        var lcp = L();
+        if (!lcp) return;
+        if (typeof window !== 'undefined' && window.confirm &&
+            !window.confirm('Remove all ⭐ Personal words? Your deck words are not affected.')) return;
+        clearPersonal(lcp);
+        showToast('🧹 Personal words cleared');
+        render();
+        return;
+      }
       case 'lex-import': {
         var fi = document.getElementById('lexfile');
         if (fi) fi.click();
@@ -2336,6 +2457,7 @@
         return;
       }
       case 'start-tol': startTol(); speakCurrent(); return;
+      case 'start-personal': startPersonal(); speakCurrent(); return;
       case 'start-due': startDue(); speakCurrent(); return;
       case 'start-listen': startListen(); return;
       case 'speak':
@@ -2578,7 +2700,43 @@
     parseLanguageFile: parseLanguageFile,
     parseFeatures: parseFeatures,
     parseKeyValueList: parseKeyValueList,
-    hashId: hashId
+    hashId: hashId,
+    /* test/debug hooks (no UI impact) */
+    boot: boot,
+    loadAll: loadAll,
+    render: render,
+    state: state,
+    getLang: L,
+    store: Store,
+    srsLoad: srsLoad,
+    missingLoad: missingLoad,
+    missingSave: missingSave,
+    missingAdd: missingAdd,
+    missingRemove: missingRemove,
+    extraLoad: extraLoad,
+    extraSave: extraSave,
+    extraAdd: extraAdd,
+    lextextGet: lextextGet,
+    lextextSet: lextextSet,
+    dictEntries: dictEntries,
+    personalCount: personalCount,
+    personalAdd: personalAdd,
+    resolveOne: resolveOne,
+    resolveMissing: resolveMissing,
+    clearPersonal: clearPersonal,
+    sanitizeLang: sanitizeLang,
+    poolFor: poolFor,
+    rangeList: rangeList,
+    levelStats: levelStats,
+    themeList: themeList,
+    tolearnEntries: tolearnEntries,
+    dueEntries: dueEntries,
+    startPersonal: startPersonal,
+    startTol: startTol,
+    startPick: startPick,
+    getPick: getPick,
+    setPick: setPick,
+    normalizeFeatures: normalizeFeatures
   };
 
   if (typeof module !== 'undefined' && module.exports) {

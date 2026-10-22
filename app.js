@@ -783,9 +783,10 @@
   /* entries matching a theme + range selection */
   function poolFor(l, themes, range) {
     var from, to;
+    var isPersonal = range === 'p';
     if (range === 'all') {
       from = 0; to = l.entries.length;
-    } else if (range === 'p') {
+    } else if (isPersonal) {
       var base = typeof l.baseCount === 'number' ? l.baseCount : l.entries.length;
       from = base; to = l.entries.length;
     } else {
@@ -796,7 +797,7 @@
     var pool = [];
     l.entries.forEach(function (e, i) {
       if (range !== 'all' && (i < from || i >= to)) return;
-      if (sel.length && sel.indexOf(featVal(e, 'theme')) < 0) return;
+      if (!isPersonal && sel.length && sel.indexOf(featVal(e, 'theme')) < 0) return;
       pool.push(e);
     });
     return pool;
@@ -879,7 +880,7 @@
     var rangeBody = '<div class="chiprow tight">';
     rangeBody += '<button class="chip' + (p.range === 'all' ? ' active' : '') + '" data-act="pick" data-key="range" data-val="all">Random from all <span class="count">' + l.entries.length + '</span></button>';
     blocks.forEach(function (b) {
-      var n = poolFor(l, p.themes, b.id).length;
+      var n = poolFor(l, b.personal ? [] : p.themes, b.id).length;
       rangeBody += '<button class="chip' + (p.range === b.id ? ' active' : '') + (n === 0 ? ' empty' : '') + '" data-act="pick" data-key="range" data-val="' + b.id + '">' +
         (b.done ? '✅' : '') + (b.personal ? '⭐ Personal' : b.from + '–' + b.to) +
         ' <span class="count">' + (n === 0 ? '0' : b.known + '★/' + n) + '</span></button>';
@@ -1154,7 +1155,8 @@
   function personalAdd(l, src) {
     var code = l.meta.code;
     var pos = src.pos || '';
-    var id = hashId(code + '|' + src.front + '|' + (pos || '?'));
+    /* own id namespace: personal copies never collide with deck cards */
+    var id = hashId(code + '|personal|' + src.front + '|' + (pos || '?'));
     for (var i = 0; i < l.entries.length; i++) if (l.entries[i].id === id) return { id: id, isNew: false, entry: l.entries[i] };
     var e = {
       id: id, front: src.front, back: src.back, pos: pos,
@@ -1162,9 +1164,10 @@
       example: '', exampleTrans: '',
       file: 'bot', line: 0
     };
-    if (!extraAdd(code, e)) return { id: id, isNew: false, entry: e };
+    extraAdd(code, e);
     l.entries.push(e);
     l._lex = null;
+    if (typeof l.baseCount !== 'number') l.baseCount = l.entries.length - 1;
     return { id: id, isNew: true, entry: e };
   }
 

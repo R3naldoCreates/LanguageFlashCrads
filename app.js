@@ -437,6 +437,7 @@
     posFilter: 'all',
     shuffle: true,
     search: '',
+    botBusy: false,
     basic: null,
     test: null,
     testCfg: { len: 10, src: 'all', typing: false }
@@ -1154,16 +1155,17 @@
     var code = l.meta.code;
     var pos = src.pos || '';
     var id = hashId(code + '|' + src.front + '|' + (pos || '?'));
-    for (var i = 0; i < l.entries.length; i++) if (l.entries[i].id === id) return { id: id, isNew: false };
+    for (var i = 0; i < l.entries.length; i++) if (l.entries[i].id === id) return { id: id, isNew: false, entry: l.entries[i] };
     var e = {
       id: id, front: src.front, back: src.back, pos: pos,
-      features: { theme: 'geral' }, example: '', exampleTrans: '',
+      features: (src.features && src.features.theme) ? src.features : { theme: 'geral' },
+      example: '', exampleTrans: '',
       file: 'bot', line: 0
     };
-    if (!extraAdd(code, e)) return { id: id, isNew: false };
+    if (!extraAdd(code, e)) return { id: id, isNew: false, entry: e };
     l.entries.push(e);
     l._lex = null;
-    return { id: id, isNew: true };
+    return { id: id, isNew: true, entry: e };
   }
 
   function resolveOne(l, word, mode) {
@@ -1191,6 +1193,109 @@
     return { resolved: resolved, added: added };
   }
 
+  /* ───────────────── online lookup (bot) ───────────────────── */
+
+  function decodeEntities(s) {
+    try {
+      var d = document.createElement('textarea');
+      d.innerHTML = s;
+      return d.value;
+    } catch (e) { return String(s || ''); }
+  }
+
+  function guessPos(back, q) {
+    var en = normSearch(back), ql = normSearch(q);
+    if (/^to\s/.test(en) || /^to\s/.test(ql)) return 'verb';
+    if (/^(a|an|the)\s/.test(en)) return 'noun';
+    return '';
+  }
+
+  function onlineTranslate(l, word) {
+    var q = String(word || '').trim();
+    var target = l.meta.code;
+    if (!q) return Promise.resolve(null);
+    var ascii = !/[^\x00-\x7F]/.test(q);
+    var dirs = ascii ? [['en', target], [target, 'en']] : [[target, 'en'], ['en', target]];
+
+    function attempt(idx) {
+      if (idx >= dirs.length) return Promise.resolve(null);
+      var from = dirs[idx][0], to = dirs[idx][1];
+      var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(q) +
+        '&langpair=' + encodeURIComponent(from + '|' + to);
+      return fetch(url, { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('http ' + r.status);
+        return r.json();
+      }).then(function (j) {
+        var cands = [];
+        var matches = (j && Array.isArray(j.matches)) ? j.matches : [];
+        matches.forEach(function (m) {
+          if (m && m.translation) cands.push({ text: m.translation, q: typeof m.quality === 'number' ? m.quality : 0 });
+        });
+        if (!matches.length && j && j.responseData && j.responseData.translatedText) {
+          cands.push({ text: j.responseData.translatedText, q: 50 });
+        }
+        var best = null, bestScore = -1, seen = {};
+        cands.forEach(function (c) {
+          var t = decodeEntities(String(c.text)).replace(/[.,;:!?¡¿]+$/g, '').trim();
+          if (!t || t.length > 40) return;
+          if (/[,;]/.test(t)) return;
+          var nt = normSearch(t);
+          if (!nt || nt === normSearch(q) || seen[nt]) return;
+          seen[nt] = true;
+          if (/^[A-ZÄÖÅ]/.test(t) && !/^[A-ZÄÖÅ]{2}/.test(t)) t = t.charAt(0).toLowerCase() + t.slice(1);
+          var score = c.q * 100 - t.length;
+          if (score > bestScore) { bestScore = score; best = t; }
+        });
+        if (best) return { from: from, to: to, text: best };
+        return attempt(idx + 1);
+      }).catch(function () { return attempt(idx + 1); });
+    }
+
+    return attempt(0).then(function (res) {
+      if (!res) return null;
+      var front = res.from === 'en' ? res.text : q;
+      var back = res.from === 'en' ? q : res.text;
+      if (!front || !back || normSearch(front) === normSearch(back)) return null;
+      return { front: front, back: back, pos: guessPos(back, q) };
+    });
+  }
+
+  function lextextAppend(code, front, back) {
+    var txt = lextextGet(code);
+    var exists = parseLexiconText(txt).some(function (e) {
+      return normSearch(e.front) === normSearch(front) && normSearch(e.back) === normSearch(back);
+    });
+    if (exists) return;
+    txt = (txt ? txt.replace(/\s+$/, '') + '\n' : '') + front + ' = ' + back;
+    lextextSet(code, txt);
+  }
+
+  function onlineResolve(l, word) {
+    return onlineTranslate(l, word).then(function (res) {
+      if (!res) return null;
+      var r = personalAdd(l, { front: res.front, back: res.back, pos: res.pos, features: { theme: 'geral' } });
+      Store.add(l.meta.code, r.id);
+      missingRemove(l.meta.code, word);
+      lextextAppend(l.meta.code, res.front, res.back);
+      l._lex = null;
+      return r.entry;
+    });
+  }
+
+  function onlineResolveMany(l, words, limit) {
+    var queue = words.slice(0, limit || 8);
+    var done = 0;
+    function next() {
+      if (!queue.length) return Promise.resolve(done);
+      var w = queue.shift();
+      return onlineResolve(l, w).then(function (e) {
+        if (e) done++;
+        return next();
+      }, function () { return next(); });
+    }
+    return next();
+  }
+
   function missingAdd(code, text) {
     text = String(text || '').trim();
     if (!text) return false;
@@ -1210,8 +1315,8 @@
     var a = missingLoad(l.meta.code);
     var txt = lextextGet(l.meta.code);
     var fileCount = txt ? parseLexiconText(txt).length : 0;
-    var body = '<p class="home-foot">The helper checks your deck, the built-in word bank and your own words file. ' +
-      'Matches become real cards (added to To Learn) and leave this list. It re-runs every time the app opens.</p>';
+    var body = '<p class="home-foot">Tap a word — the bot checks the deck, the built-in word banks and your words file, ' +
+      'then looks it up online if needed. New words become cards in ⭐ Personal and are saved to your local words file.</p>';
 
     if (a.length) {
       body += '<p class="home-foot">Tap a word — the bot looks it up and moves it into ⭐ Personal at the end of the deck.</p>';
@@ -1970,10 +2075,22 @@
         var lb = L();
         if (!lb) return;
         var rb = resolveMissing(lb);
-        showToast(rb.resolved
-          ? '🤖 Matched ' + rb.resolved + ' word(s) — ' + rb.added + ' new card(s) in To Learn'
-          : '🤖 Nothing matched yet — try adding more words to your file');
-        render();
+        var left = missingLoad(lb.meta.code);
+        if (!left.length) {
+          showToast('🤖 All missing words resolved' + (rb.resolved ? ' — ' + rb.resolved + ' matched' : ''));
+          render();
+          return;
+        }
+        if (state.botBusy) { showToast('🌐 Still looking…'); return; }
+        state.botBusy = true;
+        showToast('🌐 Looking up ' + Math.min(left.length, 8) + ' word(s) online…');
+        onlineResolveMany(lb, left, 8).then(function (n) {
+          state.botBusy = false;
+          showToast(n
+            ? '✅ ' + n + ' word(s) added to ⭐ Personal' + (rb.resolved ? ' · ' + rb.resolved + ' from word banks' : '')
+            : '🤖 No online matches — kept in Missing words');
+          render();
+        });
         return;
       }
       case 'lex-import': {
@@ -2012,10 +2129,26 @@
         if (rOne.ok) {
           showToast('✅ “' + mw + '” added to ⭐ Personal');
           trySpeak(rOne.entry.front, lr2.meta.ttsLang || lr2.meta.code, lr2.meta.code, lr2.meta.name, false);
-        } else {
-          showToast('🤖 Not in the dictionary yet — load a 📄 Words file with it');
+          render();
+          return;
         }
-        render();
+        if (state.botBusy) { showToast('🌐 Still looking…'); return; }
+        state.botBusy = true;
+        showToast('🌐 Looking up “' + mw + '” online…');
+        onlineResolve(lr2, mw).then(function (entry) {
+          state.botBusy = false;
+          if (entry) {
+            showToast('✅ “' + entry.front + '” — ' + entry.back + ' · added to ⭐ Personal');
+            trySpeak(entry.front, lr2.meta.ttsLang || lr2.meta.code, lr2.meta.code, lr2.meta.name, false);
+          } else {
+            showToast('🤖 No translation found — check spelling or load a 📄 Words file');
+          }
+          render();
+        }).catch(function () {
+          state.botBusy = false;
+          showToast('🌐 No internet — word stays in Missing words');
+          render();
+        });
         return;
       }
       case 'missing-del': {
